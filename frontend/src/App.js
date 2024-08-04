@@ -2,12 +2,13 @@ import logo from './logo.svg';
 import './App.css';
 import React from 'react';
 import Home from './Home';
+import Layout from './components/Layout';
 
 function App() {
   return (
-    <div className="App">
+    <Layout>
       <Home />
-    </div>
+    </Layout>
   );
 }
 
