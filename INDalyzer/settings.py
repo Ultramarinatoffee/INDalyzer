@@ -134,8 +134,12 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
-# Pour aider à Django de trouver les fichiers statiques de React
+# Configuration pour aider à Django de trouver les fichiers statiques de React
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'frontend', 'build', 'static'),
     BASE_DIR / "frontend" / "build" / "static",
 ]
+
+# Configuration pour la partie login
+LOGIN_REDIRECT_URL = '/'
+LOGOUT_REDIRECT_URL = '/'

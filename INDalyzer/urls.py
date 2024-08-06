@@ -18,11 +18,17 @@ from django.contrib import admin
 from django.urls import path, include
 from indalyzer_core.views import home
 from django.views.generic import TemplateView
+from indalyzer_core.views import home, auth_status, login_view
+from django.contrib.auth.views import LogoutView
 
 urlpatterns = [
     # path('', home, name='home'),
     path('admin/', admin.site.urls),
     # path('indalyzer/', include('indalyzer_core.urls')),
     path('', TemplateView.as_view(template_name='index.html')),
+    path('accounts/', include('django.contrib.auth.urls')),
+    path('api/auth-status/', auth_status, name='auth_status'),
+    path('api/login/', login_view, name='api_login'),
+    path('api/logout/', LogoutView.as_view(), name='logout'),
     
 ]
