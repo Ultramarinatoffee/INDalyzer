@@ -2,7 +2,7 @@
 import React from 'react';
 import axios from 'axios';
 
-const Header = ({ setIsAuthenticated }) => {
+const Header = ({ setIsAuthenticated, isAuthenticated }) => {
   const handleLogout = async () => {
     try {
       await axios.post('/api/logout/');
@@ -18,7 +18,7 @@ const Header = ({ setIsAuthenticated }) => {
       <nav>
         {/* Ajoutez ici d'autres liens de navigation si nécessaire */}
       </nav>
-      <button onClick={handleLogout}>Déconnexion</button>
+      {isAuthenticated && <button onClick={handleLogout}>Déconnexion</button>}
     </header>
   );
 };

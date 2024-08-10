@@ -7,6 +7,8 @@ from django.contrib.auth import authenticate, login, logout
 from django.views.decorators.csrf import csrf_protect
 import json
 
+from django.views.decorators.csrf import csrf_exempt
+
 
 @api_view(['GET'])
 def hello_world(request):
@@ -22,7 +24,7 @@ def auth_status(request):
         'username': request.user.username if request.user.is_authenticated else None
     })
 
-@csrf_protect
+@csrf_exempt
 def login_view(request):
     if request.method == 'POST':
         data = json.loads(request.body)
