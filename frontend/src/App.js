@@ -6,6 +6,7 @@ import Layout from './components/Layout';
 import Login from './components/Login';
 import axios from 'axios';
 
+
 axios.defaults.xsrfCookieName = 'csrftoken';
 axios.defaults.xsrfHeaderName = 'X-CSRFToken';
 
@@ -13,6 +14,7 @@ axios.defaults.xsrfHeaderName = 'X-CSRFToken';
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState('home');
 
   useEffect(() => {
     const checkAuthStatus = async () => {
@@ -36,9 +38,26 @@ function App() {
     return <div>Chargement...</div>;
   }
 
+  const renderPage = () => {
+    if (!isAuthenticated) {
+      return <Login setIsAuthenticated={setIsAuthenticated} />;
+    }
+
+    switch (currentPage) {
+      case 'home':
+        return <Home setCurrentPage={setCurrentPage} />;
+      case 'calculAT':
+        return <div>Page de calcul AT</div>;
+      case 'calculDC':
+        return <div>Page de calcul DC</div>;
+      default:
+        return <Home setCurrentPage={setCurrentPage} />;
+    }
+  };
+
   return (
     <Layout setIsAuthenticated={setIsAuthenticated} isAuthenticated={isAuthenticated}>
-      {isAuthenticated ? <Home /> : <Login setIsAuthenticated={setIsAuthenticated} />}
+      {renderPage()}
     </Layout>
   );
 }
