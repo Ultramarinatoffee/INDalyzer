@@ -35,8 +35,8 @@ def login_view(request):
             login(request, user)
             return JsonResponse({'success': True})
         else:
-            return JsonResponse({'success': False, 'message': 'Invalid credentials'}, status=400)
-    return JsonResponse({'message': 'Invalid request method'}, status=405)
+            return JsonResponse({"success": False, "message": "Nom d'utilisateur ou mot de passe incorrect. Veuillez réessayer."}, status=400)
+    return JsonResponse({'message': 'Méthode non autorisée'}, status=405)
 
 def logout_view(request):
     logout(request)

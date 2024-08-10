@@ -22,14 +22,14 @@ const Login = ({ setIsAuthenticated }) => {
       const response = await axios.post('/api/login/', { username, password });
       if (response.data.success) {
         setIsAuthenticated(true);
-        // Optionnel : redirection ou autre action après connexion réussie
-        // window.location.href = '/';
-      } else {
-        setError('Échec de la connexion. Veuillez vérifier vos identifiants.');
       }
     } catch (error) {
+      if (error.response && error.response.data && error.response.data.message) {
+        setError(error.response.data.message);
+      } else {
+        setError('Une erreur s\'est produite. Veuillez réessayer plus tard.');
+      }
       console.error('Erreur de connexion', error);
-      setError('Une erreur s\'est produite lors de la connexion. Veuillez réessayer.');
     }
   };
 
