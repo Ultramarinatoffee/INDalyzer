@@ -100,3 +100,52 @@ footer {
   text-align: center;
   padding: 10px 0;
 }
+
+.form-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center; /* Centrer les champs horizontalement */
+  width: 100%; /* Utiliser toute la largeur disponible */
+  max-width: 400px; /* Limiter la largeur maximale pour une meilleure lisibilité */
+  margin: auto; /* Centrer le formulaire dans la page */
+  padding: 20px; /* Ajouter un peu d'espace autour du formulaire */
+}
+
+.form-field {
+  width: 100%; /* Champs utilisent toute la largeur du conteneur */
+  margin-bottom: 20px; /* Espacer les champs verticalement */
+}
+
+.form-field input,
+.form-field select {
+  width: 100%; /* Les éléments de saisie utilisent toute la largeur du champ */
+  padding: 8px; /* Un peu de padding pour faciliter la saisie */
+  font-size: 16px; /* Taille de police plus lisible */
+  box-sizing: border-box; /* Le padding et la bordure sont inclus dans la largeur */
+}
+
+.form-field label {
+  font-weight: bold; /* Rendre les labels plus visibles */
+  margin-bottom: 5px; /* Espacer le label du champ de saisie */
+}
+
+.form-actions {
+  width: 100%; /* Les boutons utilisent toute la largeur disponible */
+  display: flex;
+  justify-content: space-between; /* Espacer les boutons */
+}
+
+.button {
+  padding: 10px 20px;
+  font-size: 16px;
+  cursor: pointer;
+  background-color: #61dafb;
+  border: none;
+  color: white;
+  border-radius: 5px;
+  transition: background-color 0.3s;
+}
+
+.button:hover {
+  background-color: #4aa1c8; /* Changement de couleur au survol */
+}

@@ -5,6 +5,7 @@ import Home from './Home';
 import Layout from './components/Layout';
 import Login from './components/Login';
 import axios from 'axios';
+import CalculAT from './components/CalculAT';
 
 
 axios.defaults.xsrfCookieName = 'csrftoken';
@@ -47,7 +48,7 @@ function App() {
       case 'home':
         return <Home setCurrentPage={setCurrentPage} />;
       case 'calculAT':
-        return <div>Page de calcul AT</div>;
+        return <CalculAT />;
       case 'calculDC':
         return <div>Page de calcul DC</div>;
       default:
