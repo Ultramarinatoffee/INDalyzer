@@ -23,17 +23,18 @@ function RechercheAffilie({ setEtape, setAffilie }) {
     }
 
     try {
-      const response = await axios.get(`/api/affilies/search?${query}`);
-      if (response.data.length > 0) {
-        setAffilie(response.data[0]);
-        setEtape('detailsAccident');
-      } else {
-        alert("Aucun affilié trouvé");
+        const response = await axios.get(`/api/affilies/?${query}`);
+        if (response.data.length > 0) {
+          setAffilie(response.data[0]);
+          setEtape('detailsAccident');
+        } else {
+          alert("Aucun affilié trouvé");
+        }
+      } catch (error) {
+        console.error("Erreur lors de la recherche", error);
+        alert("Une erreur s'est produite lors de la recherche");
       }
-    } catch (error) {
-      console.error("Erreur lors de la recherche", error);
-    }
-  };
+    };
 
   return (
     <div className="form-container">

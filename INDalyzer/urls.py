@@ -18,7 +18,7 @@ from django.contrib import admin
 from django.urls import path, include
 from indalyzer_core.views import home
 from django.views.generic import TemplateView
-from indalyzer_core.views import home, auth_status, login_view
+from indalyzer_core.views import auth_status, login_view
 from django.contrib.auth.views import LogoutView
 
 urlpatterns = [
@@ -30,5 +30,6 @@ urlpatterns = [
     path('api/auth-status/', auth_status, name='auth_status'),
     path('api/login/', login_view, name='api_login'),
     path('api/logout/', LogoutView.as_view(), name='logout'),
+    path('api/', include('indalyzer_core.urls')),
     
 ]

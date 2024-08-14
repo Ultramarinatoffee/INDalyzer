@@ -4,10 +4,18 @@ function EncodageManuel({ setEtape, setAffilie }) {
   const [nom, setNom] = useState('');
   const [prenom, setPrenom] = useState('');
   const [rn, setRN] = useState('');
+  const [dateNaissance, setDateNaissance] = useState('');
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    setAffilie({ nom, prenom, numero_registre_national: rn });
+    // Au lieu de sauvegarder dans la base de données, nous stockons simplement dans l'état
+    setAffilie({
+      nom,
+      prenom,
+      numero_registre_national: rn,
+      date_naissance: dateNaissance,
+      estTemporaire: true // Indique que cet affilié n'est pas enregistré dans la BD
+    });
     setEtape('detailsAccident');
   };
 
@@ -32,6 +40,12 @@ function EncodageManuel({ setEtape, setAffilie }) {
         value={rn} 
         onChange={(e) => setRN(e.target.value)}
         placeholder="Numéro de Registre National"
+        required
+      />
+      <input 
+        type="date" 
+        value={dateNaissance} 
+        onChange={(e) => setDateNaissance(e.target.value)}
         required
       />
       <button type="submit">Suivant</button>

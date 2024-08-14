@@ -129,6 +129,8 @@ footer {
   margin-bottom: 5px; /* Espacer le label du champ de saisie */
 }
 
+
+
 .form-actions {
   width: 100%; /* Les boutons utilisent toute la largeur disponible */
   display: flex;
