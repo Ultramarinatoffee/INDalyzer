@@ -72,6 +72,12 @@ class AccidentViewSet(viewsets.ModelViewSet):
     queryset = Accident.objects.all()
     serializer_class = AccidentSerializer
 
+    def get_queryset(self):
+        affilie_id = self.request.query_params.get('affilie', None)
+        if affilie_id is not None:
+            return self.queryset.filter(affilie_id=affilie_id)
+        return self.queryset
+
 class CalculIndemniteViewSet(viewsets.ModelViewSet):
     queryset = CalculIndemnite.objects.all()
     serializer_class = CalculIndemniteSerializer
