@@ -18,13 +18,16 @@ function CalculAT() {
       case 'encodageManuel':
         return <EncodageManuel setEtape={setEtape} setAffilie={setAffilie} />;
       case 'detailsAccident':
-        return <DetailsAccident setEtape={setEtape} setDateAccident={setDateAccident} />;
+        return <DetailsAccident setEtape={setEtape} setDateAccident={setDateAccident} affilie={affilie} />;
       case 'choixReclamation':
         return <ChoixTypeReclamation setEtape={setEtape} setTypeReclamation={setTypeReclamation} />;
       default:
         return <div>Étape inconnue</div>;
     }
   };
+
+
+  
 
   const soumettreCalcul = async () => {
     try {

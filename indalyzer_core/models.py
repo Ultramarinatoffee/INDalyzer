@@ -13,7 +13,7 @@ class Affilie(models.Model):
     email = models.EmailField(default='example@example.com') # pour développer la fonction d'envoi d'une notification
     
     def __str__(self):
-        numero_externe = f"Ext: {self.numero_externe}" if self.numero_externe else "Aff: Non défini"
+        numero_externe = f": {self.numero_externe}" if self.numero_externe else "Aff: Non défini"
         return f"{self.nom} {self.prenom} - RN: {self.numero_registre_national} - {numero_externe}"
     
     class Meta:
@@ -52,22 +52,22 @@ class Accident(models.Model):
         ('COMMUN', 'Droit commun'),
     ]
     STATUT_CHOMAGE = [
-         ('NON', 'Non applicable'),
+        ('NON', 'Non applicable'),
         ('OCCASIONNEL', 'Chômeur occasionnel'),
         ('LONGUE_DUREE', 'Chômeur de longue durée'),
     ]
     
-    affilie = models.ForeignKey(Affilie, on_delete=models.CASCADE)
+    affilie = models.ForeignKey(Affilie, on_delete=models.CASCADE, related_name='accidents')
     date_accident = models.DateField(null=True, blank=True)
     source_donnees = models.CharField(max_length=10, choices=[('BD', 'Base de données'), ('MANUEL', 'Encodage manuel')])
     type_accident = models.CharField(max_length=10, choices=TYPES_ACCIDENT, default='TRAVAIL')
-    statut_chomage = models.CharField(max_length=15, choices=STATUT_CHOMAGE, default='OCCASIONNEL')
+    statut_chomage = models.CharField(max_length=15, choices=STATUT_CHOMAGE, default='NON_APPLICABLE')
     convention_assuralia = models.BooleanField(default=False)
 
     def clean(self):
-        if self.type_accident == 'TRAVAIL' and self.statut_chomage != 'NON':
+        if self.type_accident == 'TRAVAIL' and self.statut_chomage != 'NON_APPLICABLE':
             raise ValidationError('Le statut de chômage doit être "Non applicable" pour un accident de travail.')
-        if self.type_accident == 'COMMUN' and self.convention_assuralia and self.statut_chomage == 'NON':
+        if self.type_accident == 'COMMUN' and self.convention_assuralia and self.statut_chomage == 'NON_APPLICABLE':
             raise ValidationError('Le statut de chômage doit être spécifié pour un droit commun avec la convention ASSURALIA.')
 
 

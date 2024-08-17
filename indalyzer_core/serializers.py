@@ -6,17 +6,18 @@ class PeriodeIndemnisationSerializer(serializers.ModelSerializer):
         model = PeriodeIndemnisation
         fields = '__all__'
 
-class AffilieSerializer(serializers.ModelSerializer):
-    periodes_indemnisation = PeriodeIndemnisationSerializer(many=True, read_only=True)
-    
-    class Meta:
-        model = Affilie
-        fields = '__all__'
 
 class AccidentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Accident
-        fields = '__all__'
+        fields = ['id', 'date_accident', 'type_accident', 'statut_chomage', 'convention_assuralia']
+
+class AffilieSerializer(serializers.ModelSerializer):
+    accidents = AccidentSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = Affilie
+        fields = ['id', 'numero_registre_national', 'numero_externe', 'nom', 'prenom', 'date_naissance', 'email', 'accidents']
 
 class CalculIndemniteSerializer(serializers.ModelSerializer):
     class Meta:

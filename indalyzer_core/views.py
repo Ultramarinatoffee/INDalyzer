@@ -9,6 +9,7 @@ import json
 from rest_framework import viewsets
 from .models import Affilie, Accident, CalculIndemnite, PeriodeIndemnisation
 from .serializers import AffilieSerializer, AccidentSerializer, CalculIndemniteSerializer, PeriodeIndemnisationSerializer
+from rest_framework.decorators import action
 
 
 from django.views.decorators.csrf import csrf_exempt
@@ -52,6 +53,20 @@ def logout_view(request):
 class AffilieViewSet(viewsets.ModelViewSet):
     queryset = Affilie.objects.all()
     serializer_class = AffilieSerializer
+
+    @action(detail=False, methods=['get'])
+    def search(self, request):
+        query = request.query_params.get('rn', '')
+        affilies = Affilie.objects.filter(numero_registre_national__icontains=query)
+        serializer = self.get_serializer(affilies, many=True)
+        return Response(serializer.data)
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        rn = self.request.query_params.get('rn', None)
+        if rn is not None:
+            queryset = queryset.filter(numero_registre_national__icontains=rn)
+        return queryset
 
 class AccidentViewSet(viewsets.ModelViewSet):
     queryset = Accident.objects.all()
