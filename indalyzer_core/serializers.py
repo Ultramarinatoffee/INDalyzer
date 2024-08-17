@@ -8,9 +8,14 @@ class PeriodeIndemnisationSerializer(serializers.ModelSerializer):
 
 
 class AccidentSerializer(serializers.ModelSerializer):
+    
+    date_accident = serializers.DateField(format='%d/%m/%Y')
+    type_accident_display = serializers.CharField(source='get_type_accident_display')
+
     class Meta:
         model = Accident
-        fields = ['id', 'date_accident', 'type_accident', 'statut_chomage', 'convention_assuralia']
+        fields = ['id', 'date_accident', 'type_accident', 'type_accident_display', 'statut_chomage', 'convention_assuralia']
+
 
 class AffilieSerializer(serializers.ModelSerializer):
     accidents = AccidentSerializer(many=True, read_only=True)

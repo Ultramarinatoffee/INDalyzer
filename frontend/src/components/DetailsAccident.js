@@ -19,13 +19,13 @@ function DetailsAccident({ setEtape, setDateAccident, affilie }) {
     }
   }, [affilie]);
 
-  const handleAccidentSelect = (accident) => {
+  const handleAccidentClick = (accident) => {
     setDateAccident(accident.date_accident);
     setEtape('choixReclamation');
   };
 
   return (
-    <div>
+    <div className="details-accident">
       <h3>Détails de l'affilié</h3>
       <p>Nom: {affilie.nom}</p>
       <p>Prénom: {affilie.prenom}</p>
@@ -34,13 +34,26 @@ function DetailsAccident({ setEtape, setDateAccident, affilie }) {
 
       <h3>Liste des accidents</h3>
       {accidents.length > 0 ? (
-        <ul>
-          {accidents.map(accident => (
-            <li key={accident.id} onClick={() => handleAccidentSelect(accident)}>
-              Date: {accident.date_accident}, Type: {accident.type_accident}
-            </li>
-          ))}
-        </ul>
+        <table className="accidents-table">
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Type</th>
+            </tr>
+          </thead>
+          <tbody>
+            {accidents.map(accident => (
+              <tr 
+                key={accident.id} 
+                onClick={() => handleAccidentClick(accident)}
+                className="clickable-row"
+              >
+                <td>{accident.date_accident}</td>
+                <td>{accident.type_accident_display}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       ) : (
         <p>Aucun accident enregistré pour cet affilié.</p>
       )}

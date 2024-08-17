@@ -48,8 +48,9 @@ class Affilie(models.Model):
 
 class Accident(models.Model):
     TYPES_ACCIDENT = [
-        ('TRAVAIL', 'Accident de travail'),
-        ('COMMUN', 'Droit commun'),
+        ('AT', 'Accident de travail'),
+        ('DC', 'Droit commun'),
+        ('Autre', 'Autre accident') # pour les accidents de la vie privée, sans récupération etc...
     ]
     STATUT_CHOMAGE = [
         ('NON', 'Non applicable'),
@@ -60,15 +61,17 @@ class Accident(models.Model):
     affilie = models.ForeignKey(Affilie, on_delete=models.CASCADE, related_name='accidents')
     date_accident = models.DateField(null=True, blank=True)
     source_donnees = models.CharField(max_length=10, choices=[('BD', 'Base de données'), ('MANUEL', 'Encodage manuel')])
-    type_accident = models.CharField(max_length=10, choices=TYPES_ACCIDENT, default='TRAVAIL')
+    type_accident = models.CharField(max_length=6, choices=TYPES_ACCIDENT)
     statut_chomage = models.CharField(max_length=15, choices=STATUT_CHOMAGE, default='NON_APPLICABLE')
     convention_assuralia = models.BooleanField(default=False)
 
     def clean(self):
-        if self.type_accident == 'TRAVAIL' and self.statut_chomage != 'NON_APPLICABLE':
+        if self.type_accident == 'AT' and self.statut_chomage != 'NON_APPLICABLE':
             raise ValidationError('Le statut de chômage doit être "Non applicable" pour un accident de travail.')
-        if self.type_accident == 'COMMUN' and self.convention_assuralia and self.statut_chomage == 'NON_APPLICABLE':
+        if self.type_accident == 'DC' and self.convention_assuralia and self.statut_chomage == 'NON_APPLICABLE':
             raise ValidationError('Le statut de chômage doit être spécifié pour un droit commun avec la convention ASSURALIA.')
+        if self.type_accident not in dict(self.TYPES_ACCIDENT):
+            raise ValidationError("Type d'accident non valide.")
 
 
     def __str__(self):
@@ -120,7 +123,7 @@ class CalculIndemnite(models.Model):
     commentaire = models.TextField(blank=True, null=True) 
 
     def clean(self):
-        if self.accident.type_accident == 'TRAVAIL' and not self.salaire_reference: # pylint: disable=E1101
+        if self.accident.type_accident == 'AT' and not self.salaire_reference: # pylint: disable=E1101
             raise ValidationError('Le salaire de référence est requis pour les accidents de travail.')
         
     def __str__(self):
