@@ -65,6 +65,13 @@ class Accident(models.Model):
     statut_chomage = models.CharField(max_length=15, choices=STATUT_CHOMAGE, default='NON_APPLICABLE')
     convention_assuralia = models.BooleanField(default=False)
 
+    salaire_base = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    date_consolidation = models.DateField(null=True, blank=True)
+    taux_IPP = models.PositiveIntegerField(null=True, blank=True, verbose_name="Taux d'IPP (%)")
+
+
+        
+
     def clean(self):
         if self.type_accident == 'AT' and self.statut_chomage != 'NON_APPLICABLE':
             raise ValidationError('Le statut de chômage doit être "Non applicable" pour un accident de travail.')
@@ -72,6 +79,9 @@ class Accident(models.Model):
             raise ValidationError('Le statut de chômage doit être spécifié pour un droit commun avec la convention ASSURALIA.')
         if self.type_accident not in dict(self.TYPES_ACCIDENT):
             raise ValidationError("Type d'accident non valide.")
+        if self.type_accident == 'AT' and not self.salaire_base:
+            raise ValidationError("Le salaire de base est requis pour les accidents de travail.")
+      
 
 
     def __str__(self):
@@ -108,11 +118,8 @@ class CalculIndemnite(models.Model):
     type_calcul = models.CharField(max_length=3, choices=TYPES_CALCUL)
     date_calcul = models.DateTimeField(auto_now_add=True)
     source_montant = models.CharField(max_length=10, choices=SOURCES_MONTANT, default='ENCODE')
-    salaire_reference = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
-    taux_incapacite = models.DecimalField(max_digits=5, decimal_places=2)
     date_debut = models.DateField(null=True, blank=True)
     date_fin = models.DateField(null=True, blank=True)
-    date_consolidation = models.DateField(null=True, blank=True)
     montant = models.DecimalField(max_digits=10, decimal_places=2)
     montant_calcule = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
     taux_journalier = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
@@ -122,9 +129,6 @@ class CalculIndemnite(models.Model):
     utilisateur = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)  # L'utilisateur qui a effectué le calcul
     commentaire = models.TextField(blank=True, null=True) 
 
-    def clean(self):
-        if self.accident.type_accident == 'AT' and not self.salaire_reference: # pylint: disable=E1101
-            raise ValidationError('Le salaire de référence est requis pour les accidents de travail.')
         
     def __str__(self):
         return f"Calcul {self.type_calcul} pour {self.accident.affilie} du {self.date_calcul}"  # pylint: disable=E1101

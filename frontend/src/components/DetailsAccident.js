@@ -39,6 +39,9 @@ function DetailsAccident({ setEtape, setDateAccident, affilie }) {
             <tr>
               <th>Date</th>
               <th>Type</th>
+              <th>Date de consolidation</th>
+              <th>Taux IPP</th>
+              <th>Salaire de base</th>
             </tr>
           </thead>
           <tbody>
@@ -50,6 +53,11 @@ function DetailsAccident({ setEtape, setDateAccident, affilie }) {
               >
                 <td>{accident.date_accident}</td>
                 <td>{accident.type_accident_display}</td>
+                <td>{accident.date_consolidation || 'N/A'}</td>
+                <td>{accident.taux_IPP !== null ? `${accident.taux_IPP}%` : 'N/A'}</td>
+                <td>{accident.type_accident === 'AT' ? 
+                    (accident.salaire_base ? `${accident.salaire_base}€` : 'Non défini') : 
+                    'N/A'}</td>
               </tr>
             ))}
           </tbody>
