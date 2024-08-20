@@ -50,6 +50,36 @@ def logout_view(request):
     logout(request)
     return JsonResponse({'success': True})
 
+@api_view(['POST'])
+def soumettre_calcul(request):
+    affilie_id = request.data.get('affilie')
+    accident_id = request.data.get('accident')
+    date_debut = request.data.get('date_debut')
+    date_fin = request.data.get('date_fin')
+    type_reclamation = request.data.get('type_reclamation')
+    
+    try:
+        affilie = Affilie.objects.get(id=affilie_id)
+        accident = Accident.objects.get(id=accident_id)
+        
+        # Implémentez ici la logique de calcul selon vos règles métier
+        
+        calcul = CalculIndemnite.objects.create(
+            affilie=affilie,
+            accident=accident,
+            type_calcul=type_reclamation,
+            date_debut=date_debut,
+            date_fin=date_fin,
+            # Ajoutez d'autres champs selon votre logique de calcul
+        )
+        
+        serializer = CalculIndemniteSerializer(calcul)
+        return Response(serializer.data, status=201)
+    except (Affilie.DoesNotExist, Accident.DoesNotExist):
+        return Response({"error": "Affilié ou accident non trouvé"}, status=404)
+    except Exception as e:
+        return Response({"error": str(e)}, status=400)
+
 class AffilieViewSet(viewsets.ModelViewSet):
     queryset = Affilie.objects.all()
     serializer_class = AffilieSerializer

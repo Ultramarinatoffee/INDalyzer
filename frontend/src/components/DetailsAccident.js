@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 
-function DetailsAccident({ setEtape, setDateAccident, affilie }) {
+function DetailsAccident({ setEtape, setDateAccident, setAccident, affilie }) {
   const [accidents, setAccidents] = useState([]);
 
   useEffect(() => {
@@ -20,13 +20,14 @@ function DetailsAccident({ setEtape, setDateAccident, affilie }) {
   }, [affilie]);
 
   const handleAccidentClick = (accident) => {
+    setAccident(accident);
     setDateAccident(accident.date_accident);
-    setEtape('choixReclamation');
+    setEtape('recapitulatif');
   };
 
   return (
     <div className="details-accident">
-      <h3>Détails de l'affilié</h3>
+      <h3>Détails de l'affilié</h3>a
       <p>Nom: {affilie.nom}</p>
       <p>Prénom: {affilie.prenom}</p>
       <p>Numéro de registre national: {affilie.numero_registre_national}</p>

@@ -35,3 +35,14 @@ class CalculIndemniteSerializer(serializers.ModelSerializer):
                   'source_montant', 'date_debut', 'date_fin', 'montant', 'montant_calcule', 
                   'taux_journalier', 'nombre_jours', 'total', 'details', 'utilisateur', 
                   'commentaire']
+        read_only_fields = ['id', 'date_calcul', 'montant_calcule', 'total']
+    
+    def create(self, validated_data):
+        # Assurez-vous que les champs calculés sont correctement remplis
+        # Vous pouvez implémenter ici la logique de calcul si nécessaire
+        instance = super().create(validated_data)
+        # Exemple de calcul (à adapter selon vos besoins)
+        instance.montant_calcule = instance.montant  # ou votre logique de calcul
+        instance.total = instance.montant_calcule * instance.nombre_jours
+        instance.save()
+        return instance

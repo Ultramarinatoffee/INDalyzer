@@ -2,38 +2,52 @@ import React, { useState } from 'react';
 import RechercheAffilie from './RechercheAffilie';
 import EncodageManuel from './EncodageManuel';
 import DetailsAccident from './DetailsAccident';
+import RecapitulatifEtPeriode from './RecapitulatifEtPeriode';
 import ChoixTypeReclamation from './ChoixTypeReclamation';
 import axios from 'axios';
 
 function CalculAT() {
   const [etape, setEtape] = useState('recherche');
   const [affilie, setAffilie] = useState(null);
-  const [dateAccident, setDateAccident] = useState('');
+  const [accident, setAccident] = useState(null);
+  const [dateAccident, setDateAccident] = useState(null); 
+  const [periodeCalcul, setPeriodeCalcul] = useState(null);
   const [typeReclamation, setTypeReclamation] = useState('');
 
   const renderEtape = () => {
     switch(etape) {
       case 'recherche':
         return <RechercheAffilie setEtape={setEtape} setAffilie={setAffilie} />;
-      case 'encodageManuel':
-        return <EncodageManuel setEtape={setEtape} setAffilie={setAffilie} />;
       case 'detailsAccident':
-        return <DetailsAccident setEtape={setEtape} setDateAccident={setDateAccident} affilie={affilie} />;
+        return <DetailsAccident 
+        setEtape={setEtape} 
+        setDateAccident={setDateAccident}
+        setAccident={setAccident}
+        affilie={affilie} 
+        />;
+      case 'recapitulatif':
+        return <RecapitulatifEtPeriode 
+          affilie={affilie}
+          accident={accident}
+          dateAccident={dateAccident}  
+          setEtape={setEtape}
+          setPeriodeCalcul={setPeriodeCalcul}
+        />;
       case 'choixReclamation':
-        return <ChoixTypeReclamation setEtape={setEtape} setTypeReclamation={setTypeReclamation} />;
+        return <ChoixTypeReclamation setEtape={setEtape} />;
       default:
         return <div>Étape inconnue</div>;
     }
   };
 
-
   
-
   const soumettreCalcul = async () => {
     try {
       const response = await axios.post('/api/calculs/', {
         affilie: affilie.id,
-        date_accident: dateAccident,
+        accident: accident.id,
+        date_debut: periodeCalcul.dateDebut,
+        date_fin: periodeCalcul.dateFin,
         type_reclamation: typeReclamation,
         // Ajoutez d'autres données nécessaires
       });
