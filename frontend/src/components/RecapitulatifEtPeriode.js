@@ -1,10 +1,15 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 
 function RecapitulatifEtPeriode({ affilie, accident, setEtape }) {
   const [dateDebut, setDateDebut] = useState('');
   const [dateFin, setDateFin] = useState('');
   const [resultatCalcul, setResultatCalcul] = useState(null);
+
+  // debogage, à supprimer
+  useEffect(() => {
+    console.log("RecapitulatifEtPeriode monté avec:", { affilie, accident });
+  }, [affilie, accident]);
 
   const handleCalcul = async (typeReclamation) => {
     if (!dateDebut || !dateFin) {
@@ -13,43 +18,109 @@ function RecapitulatifEtPeriode({ affilie, accident, setEtape }) {
     }
 
     try {
-      const response = await axios.post('/api/calculs/', {
+      console.log("Envoi de la requête avec:", { affilie, accident, dateDebut, dateFin, typeReclamation });
+      const response = await axios.post('/api/calculs/calculer_rente/', {
         affilie: affilie.id,
         accident: accident.id,
         date_debut: dateDebut,
         date_fin: dateFin,
         type_reclamation: typeReclamation,
       });
+      console.log("Réponse reçue:", response.data);
       setResultatCalcul(response.data);
-      // Optionnel : passer à une nouvelle étape pour afficher le résultat
-      // setEtape('resultatCalcul');
     } catch (error) {
       console.error('Erreur lors du calcul:', error);
       alert("Une erreur s'est produite lors du calcul.");
     }
   };
 
+  const handleGenererPDF = async () => {
+    if (!resultatCalcul) {
+      alert("Veuillez d'abord effectuer un calcul.");
+      return;
+    }
+
+    try {
+      const response = await axios.post('/api/calculs/calculer_rente/', {
+        ...resultatCalcul,
+        affilie: affilie.id,
+        accident: accident.id,
+        date_debut: dateDebut,
+        date_fin: dateFin,
+        generate_pdf: true
+      }, {
+        responseType: 'blob'
+      });
+
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', 'rapport_rente.pdf');
+      document.body.appendChild(link);
+      link.click();
+      link.parentNode.removeChild(link);
+    } catch (error) {
+      console.error('Erreur lors de la génération du PDF:', error);
+      alert("Une erreur s'est produite lors de la génération du PDF.");
+    }
+  };
+
+  const renderTableauResultats = () => {
+    if (!resultatCalcul || !resultatCalcul.periodes) return null;
+
+    return (
+      <table>
+        <thead>
+          <tr>
+            <th>Date début d'ITT</th>
+            <th>Date fin</th>
+            <th>Nombre de jours</th>
+            <th>Taux journalier d'IPP Calculé</th>
+            <th>Total</th>
+          </tr>
+        </thead>
+        <tbody>
+          {resultatCalcul.periodes.map((periode, index) => (
+            <tr key={index}>
+              <td>{periode.debut}</td>
+              <td>{periode.fin}</td>
+              <td>{periode.nombre_jours}</td>
+              <td>{periode.montant_journalier_rente?.toFixed(2) ?? 'N/A'}€</td> {/* Utilisation de ?. et ?? pour gérer les valeurs undefined */}
+              <td>{periode.total?.toFixed(2) ?? 'N/A'}€</td> {/* Utilisation de ?. et ?? pour gérer les valeurs undefined */}
+            </tr>
+          ))}
+        </tbody>
+        <tfoot>
+          <tr>
+            <td colSpan="4">Total général</td>
+            <td>{resultatCalcul.total_general?.toFixed(2) ?? 'N/A'}€</td> {/* Utilisation de ?. et ?? pour gérer les valeurs undefined */}
+          </tr>
+        </tfoot>
+      </table>
+    );
+  };
+
   return (
     <div>
       <h2>Récapitulatif</h2>
       <h3>Détails de l'affilié</h3>
-      <p>Nom: {affilie.nom}</p>
-      <p>Prénom: {affilie.prenom}</p>
-      <p>Numéro de registre national: {affilie.numero_registre_national}</p>
+      <p>Nom: {affilie?.nom}</p> {/* Utilisation de ?. pour éviter les erreurs si affilie est null */}
+      <p>Prénom: {affilie?.prenom}</p> {/* Utilisation de ?. pour éviter les erreurs si affilie est null */}
+      <p>Numéro de registre national: {affilie?.numero_registre_national}</p> {/* Utilisation de ?. pour éviter les erreurs si affilie est null */}
 
       <h3>Détails de l'accident</h3>
-      <p>Date de l'accident: {accident.date_accident}</p>
-      <p>Type: {accident.type_accident_display}</p>
-      <p>Taux IPP: {accident.taux_IPP}%</p>
-      <p>Salaire de base: {accident.salaire_base ? `${accident.salaire_base}€` : 'Non défini'}</p>
+      <p>Date de l'accident: {accident?.date_accident}</p> {/* Utilisation de ?. pour éviter les erreurs si accident est null */}
+      <p>Type: {accident?.type_accident_display}</p> {/* Utilisation de ?. pour éviter les erreurs si accident est null */}
+      <p>Taux IPP: {accident?.taux_IPP}%</p> {/* Utilisation de ?. pour éviter les erreurs si accident est null */}
+      <p>Salaire de base: {accident?.salaire_base ? `${accident.salaire_base}€` : 'Non défini'}</p> {/* Utilisation de ?. et opérateur ternaire pour gérer les cas où salaire_base est undefined */}
 
       <h3>Période de calcul souhaitée</h3>
       <div>
         <label>
           Date de début:
-          <input 
-            type="date" 
-            value={dateDebut} 
+          <input
+            type="date"
+            value={dateDebut}
             onChange={(e) => setDateDebut(e.target.value)}
             required
           />
@@ -58,9 +129,9 @@ function RecapitulatifEtPeriode({ affilie, accident, setEtape }) {
       <div>
         <label>
           Date de fin:
-          <input 
-            type="date" 
-            value={dateFin} 
+          <input
+            type="date"
+            value={dateFin}
             onChange={(e) => setDateFin(e.target.value)}
             required
           />
@@ -73,7 +144,8 @@ function RecapitulatifEtPeriode({ affilie, accident, setEtape }) {
       {resultatCalcul && (
         <div>
           <h3>Résultat du calcul</h3>
-          <pre>{JSON.stringify(resultatCalcul, null, 2)}</pre>
+          {renderTableauResultats()}
+          <button onClick={handleGenererPDF}>Générer PDF</button>
         </div>
       )}
     </div>

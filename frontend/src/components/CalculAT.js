@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import RechercheAffilie from './RechercheAffilie';
 import EncodageManuel from './EncodageManuel';
 import DetailsAccident from './DetailsAccident';
@@ -14,6 +14,13 @@ function CalculAT() {
   const [periodeCalcul, setPeriodeCalcul] = useState(null);
   const [typeReclamation, setTypeReclamation] = useState('');
 
+  // deboggage, à supprimer
+  useEffect(() => {
+    console.log("Étape actuelle:", etape);
+    console.log("Affilie:", affilie);
+    console.log("Accident:", accident);
+  }, [etape, affilie, accident]);
+
   const renderEtape = () => {
     switch(etape) {
       case 'recherche':
@@ -26,6 +33,7 @@ function CalculAT() {
         affilie={affilie} 
         />;
       case 'recapitulatif':
+        console.log("Rendu du récapitulatif avec:", { affilie, accident, dateAccident });
         return <RecapitulatifEtPeriode 
           affilie={affilie}
           accident={accident}
