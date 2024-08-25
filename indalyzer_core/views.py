@@ -118,7 +118,13 @@ class CalculIndemniteViewSet(viewsets.ModelViewSet):
             for periode in periodes:
                 debut_calcul = max(periode.date_debut, date_debut)
                 fin_calcul = min(periode.date_fin, date_fin)
-                nombre_jours = (fin_calcul - debut_calcul).days + 1
+                nombre_jours = periode.nombre_jours
+                # nombre_jours = (fin_calcul - debut_calcul).days + 1
+
+                if debut_calcul > periode.date_debut or fin_calcul < periode.date_fin:
+                    jours_totaux = (periode.date_fin - periode.date_debut).days + 1
+                    jours_calcules = (fin_calcul - debut_calcul).days + 1
+                    nombre_jours = int(nombre_jours * jours_calcules / jours_totaux)  # Modification ici
 
                 montant_journalier_rente = (salaire_base * Decimal('0.8693') * taux_ipp) / 312
 
