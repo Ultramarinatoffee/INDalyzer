@@ -133,8 +133,6 @@ class CalculIndemniteViewSet(viewsets.ModelViewSet):
                 resultats.append({
                     'debut': formater_date(debut_calcul),
                     'fin': formater_date(fin_calcul),
-                    'debut': str(debut_calcul),
-                    'fin': str(fin_calcul),
                     'nombre_jours': nombre_jours,
                     'montant_journalier_rente': float(montant_journalier_rente),
                     'total': float(total)
@@ -181,16 +179,16 @@ class CalculIndemniteViewSet(viewsets.ModelViewSet):
         # Dessiner le tableau des périodes
         y = 650
         p.drawString(50, y, "Période")
-        p.drawString(150, y, "Nombre de jours")
-        p.drawString(250, y, "Montant journalier")
-        p.drawString(350, y, "Total")
+        p.drawString(200, y, "Nombre de jours")
+        p.drawString(350, y, "Montant journalier")
+        p.drawString(500, y, "Total")
         y -= 20
 
         for periode in data['periodes']:
             p.drawString(50, y, f"{periode['debut']} - {periode['fin']}")
-            p.drawString(150, y, str(periode['nombre_jours']))
-            p.drawString(250, y, f"{periode['montant_journalier_rente']:.2f}€")
-            p.drawString(350, y, f"{periode['total']:.2f}€")
+            p.drawString(200, y, str(periode['nombre_jours']))
+            p.drawString(350, y, f"{periode['montant_journalier_rente']:.2f}€")
+            p.drawString(500, y, f"{periode['total']:.2f}€")
             y -= 20
 
         p.drawString(250, y-20, "Total général:")
