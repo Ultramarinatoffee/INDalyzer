@@ -5,6 +5,10 @@ function RecapitulatifEtPeriode({ affilie, accident, setEtape }) {
   const [dateDebut, setDateDebut] = useState('');
   const [dateFin, setDateFin] = useState('');
   const [resultatCalcul, setResultatCalcul] = useState(null);
+  const [typeCommentaire, setTypeCommentaire] = useState('AUTRE');
+  const [pourcentageIPP, setPourcentageIPP] = useState('');
+  const [dateEffet, setDateEffet] = useState('');
+  const [commentaireTexte, setCommentaireTexte] = useState('');
 
   // debogage, à supprimer
   useEffect(() => {
@@ -25,6 +29,10 @@ function RecapitulatifEtPeriode({ affilie, accident, setEtape }) {
         date_debut: dateDebut,
         date_fin: dateFin,
         type_reclamation: typeReclamation,
+        type_commentaire: typeCommentaire,
+        pourcentage_ipp: pourcentageIPP,
+        date_effet: dateEffet,
+        commentaire_texte: commentaireTexte,
       });
       console.log("Réponse reçue:", response.data);
       setResultatCalcul(response.data);
@@ -40,17 +48,21 @@ function RecapitulatifEtPeriode({ affilie, accident, setEtape }) {
       return;
     }
 
-    try {
-      const response = await axios.post('/api/calculs/calculer_rente/', {
-        ...resultatCalcul,
-        affilie: affilie.id,
-        accident: accident.id,
-        date_debut: dateDebut,
-        date_fin: dateFin,
-        generate_pdf: true
-      }, {
-        responseType: 'blob'
-      });
+  try {
+    const response = await axios.post('/api/calculs/calculer_rente/', {
+      ...resultatCalcul,
+      affilie: affilie.id,
+      accident: accident.id,
+      date_debut: dateDebut,
+      date_fin: dateFin,
+      type_commentaire: typeCommentaire,
+      pourcentage_ipp: pourcentageIPP,
+      date_effet: dateEffet,
+      commentaire_texte: commentaireTexte,
+      generate_pdf: true
+    }, {
+      responseType: 'blob'
+    });
 
       const url = window.URL.createObjectURL(new Blob([response.data]));
       const link = document.createElement('a');
@@ -138,12 +150,60 @@ function RecapitulatifEtPeriode({ affilie, accident, setEtape }) {
         </label>
       </div>
 
+      <h3>Commentaire</h3>
+      <select value={typeCommentaire} onChange={(e) => setTypeCommentaire(e.target.value)}>
+        <option value="IPP">Reconnaissance d'une IPP</option>
+        <option value="AGGRAVATION">Aggravation d'une IPP</option>
+        <option value="ITT">Reconnaissance d'une ITT à 100%</option>
+        <option value="SALAIRE">Modification du salaire de base</option>
+        <option value="AUTRE">Autre</option>
+      </select>
+
+      {(typeCommentaire === 'IPP' || typeCommentaire === 'AGGRAVATION') && (
+        <div>
+          <label>
+            Pourcentage IPP:
+            <input
+              type="number"
+              value={pourcentageIPP}
+              onChange={(e) => setPourcentageIPP(e.target.value)}
+            />
+          </label>
+        </div>
+      )}
+
+      {typeCommentaire !== 'ITT' && (
+        <div>
+          <label>
+            Date d'effet:
+            <input
+              type="date"
+              value={dateEffet}
+              onChange={(e) => setDateEffet(e.target.value)}
+            />
+          </label>
+        </div>
+      )}
+
+      {typeCommentaire === 'AUTRE' && (
+        <div>
+          <label>
+            Commentaire:
+            <textarea
+              value={commentaireTexte}
+              onChange={(e) => setCommentaireTexte(e.target.value)}
+            />
+          </label>
+        </div>
+      )}
+
       <button onClick={() => handleCalcul('standard')}>Réclamation Standard</button>
       <button onClick={() => handleCalcul('personnalisee')}>Réclamation Personnalisée</button>
 
       {resultatCalcul && (
         <div>
           <h3>Résultat du calcul</h3>
+          {resultatCalcul.commentaire && <p>{resultatCalcul.commentaire}</p>}
           {renderTableauResultats()}
           <button onClick={handleGenererPDF}>Générer PDF</button>
         </div>

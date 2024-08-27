@@ -93,7 +93,6 @@ class Accident(models.Model):
         return dict(self.TYPES_ACCIDENT).get(self.type_accident, self.type_accident)
     
 
-
 class CalculIndemnite(models.Model):
     TYPES_CALCUL = [
         ('IET', 'Incapacité Temporaire'),
@@ -104,6 +103,47 @@ class CalculIndemnite(models.Model):
         ('RECUPERE', 'Récupéré de données existantes'),
         ('ENCODE', 'Encodé manuellement'),
     ]
+
+    COMMENTAIRE_CHOICES = [
+            ('IPP', 'Reconnaissance d\'une IPP'),
+            ('AGGRAVATION', 'Aggravation d\'une IPP'),
+            ('ITT', 'Reconnaissance d\'une ITT à 100%'),
+            ('SALAIRE', 'Modification du salaire de base'),
+            ('AUTRE', 'Autre (texte libre)'),
+        ]
+
+    type_commentaire = models.CharField(
+        max_length=20,
+        choices=COMMENTAIRE_CHOICES,
+        default='AUTRE'
+    )
+    pourcentage_ipp = models.DecimalField(
+        max_digits=5, 
+        decimal_places=2, 
+        null=True, 
+        blank=True
+    )
+    date_effet = models.DateField(null=True, blank=True)
+    nouveau_salaire_base = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        null=True,
+        blank=True
+    )
+    commentaire_texte = models.TextField(blank=True)
+
+    def get_commentaire_complet(self):
+        if self.type_commentaire == 'IPP':
+            return f"Reconnaissance d'une IPP de {self.pourcentage_ipp}% à partir du {self.date_effet.strftime('%d/%m/%Y') if self.date_effet else 'date non définie'}"
+        elif self.type_commentaire == 'AGGRAVATION':
+            return f"Aggravation d'une IPP passée à {self.pourcentage_ipp}% à partir du {self.date_effet.strftime('%d/%m/%Y') if self.date_effet else 'date non définie'}"
+        elif self.type_commentaire == 'ITT':
+            return f"Reconnaissance d'une ITT à 100% pour la période du {self.date_debut.strftime('%d/%m/%Y') if self.date_debut else 'date non définie'} au {self.date_fin.strftime('%d/%m/%Y') if self.date_fin else 'date non définie'}"
+        elif self.type_commentaire == 'SALAIRE':
+            return f"Modification du salaire de base à {self.nouveau_salaire_base}€ à partir du {self.date_effet.strftime('%d/%m/%Y') if self.date_effet else 'date non définie'}"
+        else:
+            return self.commentaire_texte
+
 
     nom_affilie = models.CharField(max_length=100)
     prenom_affilie = models.CharField(max_length=100)

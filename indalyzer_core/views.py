@@ -100,6 +100,7 @@ class CalculIndemniteViewSet(viewsets.ModelViewSet):
         try:
             affilie = Affilie.objects.get(id=affilie_id)
             accident = Accident.objects.get(id=accident_id)
+
             periodes = PeriodeIndemnisation.objects.filter(
                 affilie=affilie,
                 date_debut__lte=date_fin,
@@ -108,6 +109,21 @@ class CalculIndemniteViewSet(viewsets.ModelViewSet):
 
             taux_ipp = Decimal(accident.taux_IPP) / 100
             salaire_base = Decimal(accident.salaire_base)
+
+            type_commentaire = data.get('type_commentaire', 'AUTRE')
+            commentaire = self.generer_commentaire(
+            type_commentaire,
+            data.get('pourcentage_ipp'),
+            data.get('date_effet'),
+            data.get('commentaire_texte'),
+            date_debut,
+            date_fin
+        )
+            
+            # Assurez-vous que le commentaire n'est pas None
+            if commentaire is None:
+                commentaire = "Aucun commentaire spécifié"
+            
 
             def formater_date(date):
                 return date.strftime('%d/%m/%Y')
@@ -124,7 +140,7 @@ class CalculIndemniteViewSet(viewsets.ModelViewSet):
                 if debut_calcul > periode.date_debut or fin_calcul < periode.date_fin:
                     jours_totaux = (periode.date_fin - periode.date_debut).days + 1
                     jours_calcules = (fin_calcul - debut_calcul).days + 1
-                    nombre_jours = int(nombre_jours * jours_calcules / jours_totaux)  # Modification ici
+                    nombre_jours = int(nombre_jours * jours_calcules / jours_totaux)  
 
                 montant_journalier_rente = (salaire_base * Decimal('0.8693') * taux_ipp) / 312
 
@@ -156,6 +172,7 @@ class CalculIndemniteViewSet(viewsets.ModelViewSet):
                 },
                 'periodes': resultats,
                 'total_general': float(total_general),
+                'commentaire': commentaire,
             }
 
             if generate_pdf:
@@ -172,18 +189,49 @@ class CalculIndemniteViewSet(viewsets.ModelViewSet):
         except Exception as e:
             return Response({'error': str(e)}, status=400)
         
+    def generer_commentaire(self, type_commentaire, pourcentage_ipp, date_effet, commentaire_texte, date_debut, date_fin):
+
+        
+        if type_commentaire == 'IPP':
+            return f"Reconnaissance d'une IPP de {pourcentage_ipp}% à partir du {date_effet}"
+        elif type_commentaire == 'AGGRAVATION':
+            return f"Aggravation d'une IPP passée à {pourcentage_ipp}% à partir du {date_effet}"
+        elif type_commentaire == 'ITT':
+            return f"Reconnaissance d'une ITT à 100% pour la période du {date_debut.strftime('%d/%m/%Y')} au {date_fin.strftime('%d/%m/%Y')}"
+        elif type_commentaire == 'SALAIRE':
+            return f"Modification du salaire de base à partir du {date_effet}"
+        elif commentaire_texte:
+            return commentaire_texte
+        else:
+            return "Aucun commentaire spécifié"
+        
     def generer_rapport_pdf(self, data):
         buffer = BytesIO()
         p = canvas.Canvas(buffer, pagesize=letter)
         
-        # Ajoutez ici la logique pour dessiner le PDF
-        p.drawString(100, 750, f"Assuré(e): {data['affilie']['nom']} {data['affilie']['prenom']}")
-        p.drawString(100, 730, f"NISS: {data['affilie']['niss']}")
-        p.drawString(100, 710, f"Date de l'accident: {data['accident']['date']}")
-        p.drawString(100, 690, f"Taux IPP: {data['accident']['taux_ipp']*100}%")
+        print("Contenu de data:", data)
+
+        # Informations de base
+        y = 750
+        p.drawString(100, y, f"Assuré(e): {data['affilie']['nom']} {data['affilie']['prenom']}")
+        y -= 20
+        p.drawString(100, y, f"NISS: {data['affilie']['niss']}")
+        y -= 20
+        p.drawString(100, y, f"Date de l'accident: {data['accident']['date']}")
+        y -= 20
+        p.drawString(100, y, f"Taux IPP: {data['accident']['taux_ipp']*100}%")
+        y -= 40  # Espacement supplémentaire après les informations générales
+
+        # Ajout du commentaire
+        if 'commentaire' in data and data['commentaire']:
+            p.drawString(100, y, data['commentaire'])
+            y -= 30  # Espacement après le commentaire
+        
+        # Espacement supplémentaire avant le tableau
+        y -= 20
         
         # Dessiner le tableau des périodes
-        y = 650
+        # y = 650
         p.drawString(50, y, "Période")
         p.drawString(200, y, "Nombre de jours")
         p.drawString(350, y, "Montant journalier")
