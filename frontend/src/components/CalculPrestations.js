@@ -6,8 +6,9 @@ import RecapitulatifEtPeriode from './RecapitulatifEtPeriode';
 import ChoixTypeReclamation from './ChoixTypeReclamation';
 import axios from 'axios';
 
-function CalculAT() {
-  const [etape, setEtape] = useState('recherche');
+function CalculPrestations({ modeCalcul }) {
+  // const [etape, setEtape] = useState('recherche');
+  const [etape, setEtape] = useState(modeCalcul === 'recherche' ? 'recherche' : 'encodage');
   const [affilie, setAffilie] = useState(null);
   const [accident, setAccident] = useState(null);
   const [dateAccident, setDateAccident] = useState(null); 
@@ -25,28 +26,59 @@ function CalculAT() {
     switch(etape) {
       case 'recherche':
         return <RechercheAffilie setEtape={setEtape} setAffilie={setAffilie} />;
+      case 'encodage':
+        return <EncodageManuel 
+          setEtape={setEtape} 
+          setAffilie={setAffilie} 
+          setAccident={setAccident}
+          setDateAccident={setDateAccident}
+        />;
       case 'detailsAccident':
         return <DetailsAccident 
-        setEtape={setEtape} 
-        setDateAccident={setDateAccident}
-        setAccident={setAccident}
-        affilie={affilie} 
+          setEtape={setEtape}
+          setAccident={setAccident}
+          setDateAccident={setDateAccident}
+          affilie={affilie}
         />;
       case 'recapitulatif':
-        console.log("Rendu du récapitulatif avec:", { affilie, accident, dateAccident });
         return <RecapitulatifEtPeriode 
           affilie={affilie}
           accident={accident}
-          dateAccident={dateAccident}  
+          dateAccident={dateAccident}
           setEtape={setEtape}
           setPeriodeCalcul={setPeriodeCalcul}
         />;
-      case 'choixReclamation':
-        return <ChoixTypeReclamation setEtape={setEtape} />;
       default:
         return <div>Étape inconnue</div>;
     }
   };
+  
+  // const renderEtape = () => {
+  //   switch(etape) {
+  //     case 'recherche':
+  //       return <RechercheAffilie setEtape={setEtape} setAffilie={setAffilie} />;
+  //     case 'detailsAccident':
+  //       return <DetailsAccident 
+  //       setEtape={setEtape} 
+  //       setDateAccident={setDateAccident}
+  //       setAccident={setAccident}
+  //       affilie={affilie} 
+  //       />;
+  //     case 'recapitulatif':
+  //       console.log("Rendu du récapitulatif avec:", { affilie, accident, dateAccident });
+  //       return <RecapitulatifEtPeriode 
+  //         affilie={affilie}
+  //         accident={accident}
+  //         dateAccident={dateAccident}  
+  //         setEtape={setEtape}
+  //         setPeriodeCalcul={setPeriodeCalcul}
+  //       />;
+  //     case 'choixReclamation':
+  //       return <ChoixTypeReclamation setEtape={setEtape} />;
+  //     default:
+  //       return <div>Étape inconnue</div>;
+  //   }
+  // };
 
   
   const soumettreCalcul = async () => {
@@ -69,15 +101,25 @@ function CalculAT() {
 
   return (
     <div>
-      <h2>Calcul Accident de Travail</h2>
+      <h2>Calcul de Prestations</h2>
       {renderEtape()}
-      {etape === 'choixReclamation' && (
+      {etape === 'recapitulatif' && (
         <button onClick={soumettreCalcul}>Soumettre le calcul</button>
       )}
     </div>
   );
 }
 
+//   return (
+//     <div>
+//       <h2>Calcul Accident de Travail</h2>
+//       {renderEtape()}
+//       {etape === 'choixReclamation' && (
+//         <button onClick={soumettreCalcul}>Soumettre le calcul</button>
+//       )}
+//     </div>
+//   );
+// }
 
 
-export default CalculAT;
+export default CalculPrestations;

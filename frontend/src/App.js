@@ -5,7 +5,8 @@ import Home from './Home';
 import Layout from './components/Layout';
 import Login from './components/Login';
 import axios from 'axios';
-import CalculAT from './components/CalculAT';
+// import CalculAT from './components/CalculAT';
+import CalculPrestations from './components/CalculPrestations';
 
 
 axios.defaults.xsrfCookieName = 'csrftoken';
@@ -16,6 +17,7 @@ function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState('home');
+  const [modeCalcul, setModeCalcul] = useState('');
 
   useEffect(() => {
     const checkAuthStatus = async () => {
@@ -45,15 +47,25 @@ function App() {
     }
 
     switch (currentPage) {
-      case 'home':
-        return <Home setCurrentPage={setCurrentPage} />;
-      case 'calculAT':
-        return <CalculAT />;
-      case 'calculDC':
-        return <div>Page de calcul DC</div>;
-      default:
-        return <Home setCurrentPage={setCurrentPage} />;
-    }
+    //   case 'home':
+    //     return <Home setCurrentPage={setCurrentPage} />;
+    //   case 'calculAT':
+    //     return <CalculAT />;
+    //   case 'calculDC':
+    //     return <div>Page de calcul DC</div>;
+    //   default:
+    //     return <Home setCurrentPage={setCurrentPage} />;
+    // }
+ 
+        case 'home':
+          return <Home setCurrentPage={setCurrentPage} setModeCalcul={setModeCalcul} />;
+        case 'rechercheAffilie':
+          return <CalculPrestations modeCalcul="recherche" />;
+        case 'encodageManuel':
+          return <CalculPrestations modeCalcul="encodage" />;
+        default:
+          return <Home setCurrentPage={setCurrentPage} setModeCalcul={setModeCalcul} />;
+      }
   };
 
   return (
@@ -61,6 +73,12 @@ function App() {
       {renderPage()}
     </Layout>
   );
+  // return (
+  //   <Layout setIsAuthenticated={setIsAuthenticated} isAuthenticated={isAuthenticated}>
+  //     <Home setCurrentPage={setCurrentPage} setModeCalcul={setModeCalcul} />
+  //   </Layout>
+  // );
+
 }
 
 export default App;
