@@ -27,7 +27,7 @@ function DetailsAccident({ setEtape, setDateAccident, setAccident, affilie }) {
 
   return (
     <div className="details-accident">
-      <h3>Détails de l'affilié</h3>a
+      <h3>Détails de l'affilié</h3>
       <p>Nom: {affilie.nom}</p>
       <p>Prénom: {affilie.prenom}</p>
       <p>Numéro de registre national: {affilie.numero_registre_national}</p>

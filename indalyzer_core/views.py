@@ -192,19 +192,26 @@ class CalculIndemniteViewSet(viewsets.ModelViewSet):
     def generer_commentaire(self, type_commentaire, pourcentage_ipp, date_effet, commentaire_texte, date_debut, date_fin):
 
         
+        def formater_date(date):
+            if isinstance(date, str):
+                # Si la date est déjà une chaîne, on suppose qu'elle est au format YYYY-MM-DD
+                date = datetime.strptime(date, '%Y-%m-%d').date()
+            return date.strftime('%d/%m/%Y') if date else 'date non définie'
+
         if type_commentaire == 'IPP':
-            return f"Reconnaissance d'une IPP de {pourcentage_ipp}% à partir du {date_effet}"
+            return f"Reconnaissance d'une IPP de {pourcentage_ipp}% à partir du {formater_date(date_effet)}"
         elif type_commentaire == 'AGGRAVATION':
-            return f"Aggravation d'une IPP passée à {pourcentage_ipp}% à partir du {date_effet}"
+            return f"Aggravation d'une IPP passée à {pourcentage_ipp}% à partir du {formater_date(date_effet)}"
         elif type_commentaire == 'ITT':
-            return f"Reconnaissance d'une ITT à 100% pour la période du {date_debut.strftime('%d/%m/%Y')} au {date_fin.strftime('%d/%m/%Y')}"
+            return f"Reconnaissance d'une ITT à 100% pour la période du {formater_date(date_debut)} au {formater_date(date_fin)}"
         elif type_commentaire == 'SALAIRE':
-            return f"Modification du salaire de base à partir du {date_effet}"
+            return f"Modification du salaire de base à partir du {formater_date(date_effet)}"
         elif commentaire_texte:
             return commentaire_texte
         else:
             return "Aucun commentaire spécifié"
-        
+
+       
     def generer_rapport_pdf(self, data):
         buffer = BytesIO()
         p = canvas.Canvas(buffer, pagesize=letter)

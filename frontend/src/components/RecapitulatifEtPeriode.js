@@ -5,10 +5,11 @@ function RecapitulatifEtPeriode({ affilie, accident, setEtape }) {
   const [dateDebut, setDateDebut] = useState('');
   const [dateFin, setDateFin] = useState('');
   const [resultatCalcul, setResultatCalcul] = useState(null);
-  const [typeCommentaire, setTypeCommentaire] = useState('AUTRE');
+  // const [typeCommentaire, setTypeCommentaire] = useState('AUTRE');
   const [pourcentageIPP, setPourcentageIPP] = useState('');
   const [dateEffet, setDateEffet] = useState('');
   const [commentaireTexte, setCommentaireTexte] = useState('');
+  const [typeCommentaire, setTypeCommentaire] = useState('');
 
   // debogage, à supprimer
   useEffect(() => {
@@ -18,6 +19,11 @@ function RecapitulatifEtPeriode({ affilie, accident, setEtape }) {
   const handleCalcul = async (typeReclamation) => {
     if (!dateDebut || !dateFin) {
       alert("Veuillez sélectionner une période de calcul.");
+      return;
+    }
+
+    if (!typeCommentaire) {
+      alert("Veuillez sélectionner un type de commentaire.");
       return;
     }
 
@@ -152,6 +158,7 @@ function RecapitulatifEtPeriode({ affilie, accident, setEtape }) {
 
       <h3>Commentaire</h3>
       <select value={typeCommentaire} onChange={(e) => setTypeCommentaire(e.target.value)}>
+        <option value="" disabled>Sélectionner le motif</option>
         <option value="IPP">Reconnaissance d'une IPP</option>
         <option value="AGGRAVATION">Aggravation d'une IPP</option>
         <option value="ITT">Reconnaissance d'une ITT à 100%</option>
