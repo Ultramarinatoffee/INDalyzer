@@ -52,16 +52,19 @@ function EncodageManuel({ setEtape, setAffilie, setAccident }) {
     setAccident({
       type: formData.typeAccident,
       date: formData.dateAccident,
+      date_accident: formData.dateAccident,
       salaire_base: formData.typeAccident === 'AT' ? formData.salaireBase : undefined,
       date_consolidation: formData.dateConsolidation,
       taux_IPP: formData.tauxIPP,
       statut_chomage: formData.typeAccident === 'DC' ? formData.statutChomage : undefined,
       is_assuralia: formData.typeAccident === 'DC' ? formData.isAssuralia : undefined,
       type_calcul: formData.typeCalcul,
-      estTemporaire: true
+      estTemporaire: true,
+      type_accident_display: formData.typeAccident === 'AT' ? 'Accident de Travail' : 'Droit Commun' 
     });
+   
 
-    setEtape('recapitulatif');
+    setEtape('recapitulatif', true);
   };
 
   return (

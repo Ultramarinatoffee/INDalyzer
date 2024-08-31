@@ -13,29 +13,40 @@ function CalculPrestations({ modeCalcul }) {
   const [accident, setAccident] = useState(null);
   const [dateAccident, setDateAccident] = useState(null); 
   const [periodeCalcul, setPeriodeCalcul] = useState(null);
+  const [isManualEntry, setIsManualEntry] = useState(false);
   const [typeReclamation, setTypeReclamation] = useState('');
+
+  const setEtapeAndMode = (newEtape, isManual = false) => {
+    setEtape(newEtape);
+    setIsManualEntry(isManual);
+  };
 
   // deboggage, à supprimer
   useEffect(() => {
     console.log("Étape actuelle:", etape);
     console.log("Affilie:", affilie);
     console.log("Accident:", accident);
+    console.log('CalculPrestations monté. Mode:', modeCalcul, 'Étape:', etape);
   }, [etape, affilie, accident]);
 
   const renderEtape = () => {
+    console.log('Rendering etape:', etape);
     switch(etape) {
       case 'recherche':
-        return <RechercheAffilie setEtape={setEtape} setAffilie={setAffilie} />;
+        return <RechercheAffilie 
+          setEtape={(newEtape) => setEtapeAndMode(newEtape, false)} 
+          setAffilie={setAffilie} 
+        />;
       case 'encodage':
         return <EncodageManuel 
-          setEtape={setEtape} 
+          setEtape={(newEtape) => setEtapeAndMode(newEtape, true)}
           setAffilie={setAffilie} 
           setAccident={setAccident}
           setDateAccident={setDateAccident}
         />;
       case 'detailsAccident':
         return <DetailsAccident 
-          setEtape={setEtape}
+          setEtape={(newEtape) => setEtapeAndMode(newEtape, false)}
           setAccident={setAccident}
           setDateAccident={setDateAccident}
           affilie={affilie}
@@ -45,42 +56,16 @@ function CalculPrestations({ modeCalcul }) {
           affilie={affilie}
           accident={accident}
           dateAccident={dateAccident}
-          setEtape={setEtape}
+          setEtape={(newEtape) => setEtapeAndMode(newEtape, isManualEntry)}
           setPeriodeCalcul={setPeriodeCalcul}
+          isManualEntry={isManualEntry}
         />;
       default:
         return <div>Étape inconnue</div>;
     }
   };
   
-  // const renderEtape = () => {
-  //   switch(etape) {
-  //     case 'recherche':
-  //       return <RechercheAffilie setEtape={setEtape} setAffilie={setAffilie} />;
-  //     case 'detailsAccident':
-  //       return <DetailsAccident 
-  //       setEtape={setEtape} 
-  //       setDateAccident={setDateAccident}
-  //       setAccident={setAccident}
-  //       affilie={affilie} 
-  //       />;
-  //     case 'recapitulatif':
-  //       console.log("Rendu du récapitulatif avec:", { affilie, accident, dateAccident });
-  //       return <RecapitulatifEtPeriode 
-  //         affilie={affilie}
-  //         accident={accident}
-  //         dateAccident={dateAccident}  
-  //         setEtape={setEtape}
-  //         setPeriodeCalcul={setPeriodeCalcul}
-  //       />;
-  //     case 'choixReclamation':
-  //       return <ChoixTypeReclamation setEtape={setEtape} />;
-  //     default:
-  //       return <div>Étape inconnue</div>;
-  //   }
-  // };
-
-  
+    
   const soumettreCalcul = async () => {
     try {
       const response = await axios.post('/api/calculs/', {
@@ -110,16 +95,6 @@ function CalculPrestations({ modeCalcul }) {
   );
 }
 
-//   return (
-//     <div>
-//       <h2>Calcul Accident de Travail</h2>
-//       {renderEtape()}
-//       {etape === 'choixReclamation' && (
-//         <button onClick={soumettreCalcul}>Soumettre le calcul</button>
-//       )}
-//     </div>
-//   );
-// }
 
 
 export default CalculPrestations;

@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
+import { formaterDate } from '../utils';
 import axios from 'axios';
 
-function RecapitulatifEtPeriode({ affilie, accident, setEtape }) {
+function RecapitulatifEtPeriode({ affilie, accident, dateAccident, setEtape }) {
   const [dateDebut, setDateDebut] = useState('');
   const [dateFin, setDateFin] = useState('');
   const [resultatCalcul, setResultatCalcul] = useState(null);
@@ -127,11 +128,22 @@ function RecapitulatifEtPeriode({ affilie, accident, setEtape }) {
       <p>Numéro de registre national: {affilie?.numero_registre_national}</p> {/* Utilisation de ?. pour éviter les erreurs si affilie est null */}
 
       <h3>Détails de l'accident</h3>
-      <p>Date de l'accident: {accident?.date_accident}</p> {/* Utilisation de ?. pour éviter les erreurs si accident est null */}
-      <p>Type: {accident?.type_accident_display}</p> {/* Utilisation de ?. pour éviter les erreurs si accident est null */}
-      <p>Taux IPP: {accident?.taux_IPP}%</p> {/* Utilisation de ?. pour éviter les erreurs si accident est null */}
-      <p>Salaire de base: {accident?.salaire_base ? `${accident.salaire_base}€` : 'Non défini'}</p> {/* Utilisation de ?. et opérateur ternaire pour gérer les cas où salaire_base est undefined */}
+      {/* <p>Date de l'accident: {accident?.date_accident}</p> Utilisation de ?. pour éviter les erreurs si accident est null */}
+      {/* <p>Type: {accident?.type_accident_display}</p> Utilisation de ?. pour éviter les erreurs si accident est null */}
+      {/* <p>Taux IPP: {accident?.taux_IPP}%</p> Utilisation de ?. pour éviter les erreurs si accident est null */}
+      {/* <p>Salaire de base: {accident?.salaire_base ? `${accident.salaire_base}€` : 'Non défini'}</p> Utilisation de ?. et opérateur ternaire pour gérer les cas où salaire_base est undefined */}
 
+
+
+      <p>Date de l'accident: {formaterDate(accident?.date_accident || dateAccident || 'Non défini')}</p>
+      <p>Type: {accident?.type_accident_display || (accident?.type === 'AT' ? 'Accident de Travail' : 'Droit Commun') || 'Non défini'}</p>
+      <p>Taux IPP: {accident?.taux_IPP ? `${accident.taux_IPP}%` : 'N/A'}</p>
+      <p>Salaire de base: {accident?.salaire_base ? `${accident.salaire_base}€` : 'N/A'}</p>
+      {/* <p>Salaire de base: {accident?.salaire_base ? `${Number(accident.salaire_base).toFixed(2)}€` : 'N/A'}</p> */}
+      {/* <p>Salaire de base: {accident?.salaire_base ? `${accident.salaire_base.toFixed(2)}€` : 'N/A'}</p> */}
+
+
+      
       <h3>Période de calcul souhaitée</h3>
       <div>
         <label>
