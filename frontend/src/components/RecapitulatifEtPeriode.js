@@ -2,7 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { formaterDate } from '../utils';
 import axios from 'axios';
 
-function RecapitulatifEtPeriode({ affilie, accident, dateAccident, setEtape }) {
+function RecapitulatifEtPeriode({ affilie, accident, dateAccident, setEtape, isManualEntry}) {
+
+
   const [dateDebut, setDateDebut] = useState('');
   const [dateFin, setDateFin] = useState('');
   const [resultatCalcul, setResultatCalcul] = useState(null);
@@ -12,10 +14,31 @@ function RecapitulatifEtPeriode({ affilie, accident, dateAccident, setEtape }) {
   const [commentaireTexte, setCommentaireTexte] = useState('');
   const [typeCommentaire, setTypeCommentaire] = useState('');
 
+  const [periodes, setPeriodes] = useState([]);
+  const [periodeActuelle, setPeriodeActuelle] = useState({
+    dateDebut: '',
+    dateFin: '',
+    nombreJours: '',
+  });
+
   // debogage, à supprimer
   useEffect(() => {
     console.log("RecapitulatifEtPeriode monté avec:", { affilie, accident });
   }, [affilie, accident]);
+
+  const handlePeriodeChange = (e) => {
+    const { name, value } = e.target;
+    setPeriodeActuelle(prev => ({ ...prev, [name]: value }));
+  };
+
+  const ajouterPeriode = () => {
+    if (periodeActuelle.dateDebut && periodeActuelle.dateFin && periodeActuelle.nombreJours) {
+      setPeriodes([...periodes, periodeActuelle]);
+      setPeriodeActuelle({ dateDebut: '', dateFin: '', nombreJours: '' });
+    } else {
+      alert("Veuillez remplir tous les champs de la période.");
+    }
+  };
 
   const handleCalcul = async (typeReclamation) => {
     if (!dateDebut || !dateFin) {
@@ -69,6 +92,7 @@ function RecapitulatifEtPeriode({ affilie, accident, dateAccident, setEtape }) {
       pourcentage_ipp: pourcentageIPP,
       date_effet: dateEffet,
       commentaire_texte: typeCommentaire === 'AUTRE' ? commentaireTexte : '',
+      periodes: isManualEntry ? periodes : undefined,
       generate_pdf: true
     }, {
       responseType: 'blob'
@@ -131,47 +155,98 @@ function RecapitulatifEtPeriode({ affilie, accident, dateAccident, setEtape }) {
       <p>Numéro de registre national: {affilie?.numero_registre_national}</p> {/* Utilisation de ?. pour éviter les erreurs si affilie est null */}
 
       <h3>Détails de l'accident</h3>
-      {/* <p>Date de l'accident: {accident?.date_accident}</p> Utilisation de ?. pour éviter les erreurs si accident est null */}
-      {/* <p>Type: {accident?.type_accident_display}</p> Utilisation de ?. pour éviter les erreurs si accident est null */}
-      {/* <p>Taux IPP: {accident?.taux_IPP}%</p> Utilisation de ?. pour éviter les erreurs si accident est null */}
-      {/* <p>Salaire de base: {accident?.salaire_base ? `${accident.salaire_base}€` : 'Non défini'}</p> Utilisation de ?. et opérateur ternaire pour gérer les cas où salaire_base est undefined */}
-
-
-
+    
       <p>Date de l'accident: {formaterDate(accident?.date_accident || dateAccident || 'Non défini')}</p>
       <p>Type: {accident?.type_accident_display || (accident?.type === 'AT' ? 'Accident de Travail' : 'Droit Commun') || 'Non défini'}</p>
-      <p>Date de consolidation: {formaterDate(accident?.date_consolidation) || 'N/A'}</p>
+      {/* <p>Date de consolidation: {formaterDate(accident?.date_consolidation) || 'N/A'}</p> */}
+      <p>Date de consolidation: {accident?.type_calcul === 'ITT' ? 'N/A' : (formaterDate(accident?.date_consolidation) || 'N/A')}</p>
       <p>Taux IPP: {accident?.taux_IPP ? `${accident.taux_IPP}%` : 'N/A'}</p>
       <p>Salaire de base: {accident?.salaire_base ? `${accident.salaire_base}€` : 'N/A'}</p>
-      {/* <p>Salaire de base: {accident?.salaire_base ? `${Number(accident.salaire_base).toFixed(2)}€` : 'N/A'}</p> */}
-      {/* <p>Salaire de base: {accident?.salaire_base ? `${accident.salaire_base.toFixed(2)}€` : 'N/A'}</p> */}
 
+      {isManualEntry ? (
+        <>
+          <h3>Périodes d'indemnisation</h3>
+          <div>
+            <label htmlFor="dateDebut">Date de début :</label>
+            <input 
+              type="date" 
+              id="dateDebut"
+              name="dateDebut"
+              value={periodeActuelle.dateDebut} 
+              onChange={handlePeriodeChange}
+            />
+          </div>
+          <div>
+            <label htmlFor="dateFin">Date de fin :</label>
+            <input 
+              type="date" 
+              id="dateFin"
+              name="dateFin"
+              value={periodeActuelle.dateFin} 
+              onChange={handlePeriodeChange}
+            />
+          </div>
+          <div>
+            <label htmlFor="nombreJours">Nombre de jours :</label>
+            <input 
+              type="number" 
+              id="nombreJours"
+              name="nombreJours"
+              value={periodeActuelle.nombreJours} 
+              onChange={handlePeriodeChange}
+            />
+          </div>
+          <button type="button" onClick={ajouterPeriode}>Ajouter la période</button>
 
-      
-      <h3>Période de calcul souhaitée</h3>
-      <div>
-        <label>
-          Date de début:
-          <input
-            type="date"
-            value={dateDebut}
-            onChange={(e) => setDateDebut(e.target.value)}
-            required
-          />
-        </label>
-      </div>
-      <div>
-        <label>
-          Date de fin:
-          <input
-            type="date"
-            value={dateFin}
-            onChange={(e) => setDateFin(e.target.value)}
-            required
-          />
-        </label>
-      </div>
-
+          {periodes.length > 0 && (
+            <table>
+              <thead>
+                <tr>
+                  <th>Date de début</th>
+                  <th>Date de fin</th>
+                  <th>Nombre de jours</th>
+                </tr>
+              </thead>
+              <tbody>
+                {periodes.map((periode, index) => (
+                  <tr key={index}>
+                    <td>{formaterDate(periode.dateDebut)}</td>
+                    <td>{formaterDate(periode.dateFin)}</td>
+                    <td>{periode.nombreJours}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+        </>
+      ) : (
+        <>   
+          <h3>Période de calcul souhaitée</h3>
+          <div>
+            <label>
+              Date de début:
+              <input
+                type="date"
+                value={dateDebut}
+                onChange={(e) => setDateDebut(e.target.value)}
+                required
+              />
+            </label>
+          </div>
+          <div>
+            <label>
+              Date de fin:
+              <input
+                type="date"
+                value={dateFin}
+                onChange={(e) => setDateFin(e.target.value)}
+                required
+              />
+            </label>
+          </div>
+        </>
+      )}
+ 
       <h3>Commentaire</h3>
       <select value={typeCommentaire} onChange={(e) => setTypeCommentaire(e.target.value)}>
         <option value="" disabled>Sélectionner le motif</option>
@@ -181,32 +256,6 @@ function RecapitulatifEtPeriode({ affilie, accident, dateAccident, setEtape }) {
         <option value="SALAIRE">Modification du salaire de base</option>
         <option value="AUTRE">Autre</option>
       </select>
-
-      {/* {(typeCommentaire === 'IPP' || typeCommentaire === 'AGGRAVATION') && (
-        <div>
-          <label>
-            Pourcentage IPP:
-            <input
-              type="number"
-              value={pourcentageIPP}
-              onChange={(e) => setPourcentageIPP(e.target.value)}
-            />
-          </label>
-        </div>
-      )}
-
-      {typeCommentaire !== 'ITT' && (
-        <div>
-          <label>
-            Date d'effet:
-            <input
-              type="date"
-              value={dateEffet}
-              onChange={(e) => setDateEffet(e.target.value)}
-            />
-          </label>
-        </div>
-      )} */}
 
       {typeCommentaire === 'AUTRE' && (
         <div>

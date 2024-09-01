@@ -19,6 +19,7 @@ function EncodageManuel({ setEtape, setAffilie, setAccident }) {
   const [showAccidentInfo, setShowAccidentInfo] = useState(false);
   const [showSpecificFields, setShowSpecificFields] = useState(false);
   const [showCalculFields, setShowCalculFields] = useState(false);
+  
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;

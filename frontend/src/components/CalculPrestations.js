@@ -13,7 +13,8 @@ function CalculPrestations({ modeCalcul }) {
   const [accident, setAccident] = useState(null);
   const [dateAccident, setDateAccident] = useState(null); 
   const [periodeCalcul, setPeriodeCalcul] = useState(null);
-  const [isManualEntry, setIsManualEntry] = useState(false);
+  const [isManualEntry, setIsManualEntry] = useState(modeCalcul === 'encodage');
+  // const [isManualEntry, setIsManualEntry] = useState(false);
   const [typeReclamation, setTypeReclamation] = useState('');
 
   const setEtapeAndMode = (newEtape, isManual = false) => {
@@ -27,6 +28,7 @@ function CalculPrestations({ modeCalcul }) {
     console.log("Affilie:", affilie);
     console.log("Accident:", accident);
     console.log('CalculPrestations monté. Mode:', modeCalcul, 'Étape:', etape);
+    console.log('isManualEntry:', isManualEntry);
   }, [etape, affilie, accident]);
 
   const renderEtape = () => {
@@ -74,6 +76,7 @@ function CalculPrestations({ modeCalcul }) {
         date_debut: periodeCalcul.dateDebut,
         date_fin: periodeCalcul.dateFin,
         type_reclamation: typeReclamation,
+        is_manual_entry: isManualEntry,
         // Ajoutez d'autres données nécessaires
       });
       console.log('Calcul soumis avec succès:', response.data);
