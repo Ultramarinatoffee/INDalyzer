@@ -96,7 +96,13 @@ class CalculIndemniteViewSet(viewsets.ModelViewSet):
         date_debut = datetime.strptime(data.get('date_debut'), '%Y-%m-%d').date()
         date_fin = datetime.strptime(data.get('date_fin'), '%Y-%m-%d').date()
         type_reclamation = data.get('type_reclamation')
+        type_commentaire = data['type_commentaire']
+        commentaire_texte = data.get('commentaire_texte', '')
         generate_pdf = data.get('generate_pdf', False)
+
+
+        # deboggage
+        print("Données reçues du frontend:", data)
 
         try:
             affilie = Affilie.objects.get(id=affilie_id)
@@ -113,13 +119,12 @@ class CalculIndemniteViewSet(viewsets.ModelViewSet):
 
             type_commentaire = data.get('type_commentaire', 'AUTRE')
             commentaire = self.generer_commentaire(
-            type_commentaire,
-            data.get('pourcentage_ipp'),
-            data.get('date_effet'),
-            data.get('commentaire_texte'),
-            date_debut,
-            date_fin
-        )
+                type_commentaire,
+                data.get('commentaire_texte'),
+                accident,
+                date_debut,
+                date_fin
+            )
             
             # Assurez-vous que le commentaire n'est pas None
             if commentaire is None:
@@ -185,28 +190,31 @@ class CalculIndemniteViewSet(viewsets.ModelViewSet):
             else:
                 return Response(resultat)
 
+        except KeyError as e:
+            return Response({'error': f'Donnée manquante: {str(e)}'}, status=400)
         except (Affilie.DoesNotExist, Accident.DoesNotExist):
             return Response({'error': 'Affilié ou accident non trouvé'}, status=404)
         except Exception as e:
+            print("Erreur lors du calcul:", str(e))
             return Response({'error': str(e)}, status=400)
         
-    def generer_commentaire(self, type_commentaire, pourcentage_ipp, date_effet, commentaire_texte, date_debut, date_fin):
+    def generer_commentaire(self, type_commentaire, commentaire_texte, accident, date_debut, date_fin):
 
-        
+       
         def formater_date(date):
             if isinstance(date, str):
                 # Si la date est déjà une chaîne, on suppose qu'elle est au format YYYY-MM-DD
                 date = datetime.strptime(date, '%Y-%m-%d').date()
             return date.strftime('%d/%m/%Y') if date else 'date non définie'
-
+        
         if type_commentaire == 'IPP':
-            return f"Reconnaissance d'une IPP de {pourcentage_ipp}% à partir du {formater_date(date_effet)}"
+            return f"Reconnaissance d'une IPP de {accident.taux_IPP}% à partir du {formater_date(accident.date_consolidation)}"
         elif type_commentaire == 'AGGRAVATION':
-            return f"Aggravation d'une IPP passée à {pourcentage_ipp}% à partir du {formater_date(date_effet)}"
+            return f"Aggravation d'une IPP passée à {accident.taux_IPP}% à partir du {formater_date(accident.date_consolidation)}"
         elif type_commentaire == 'ITT':
             return f"Reconnaissance d'une ITT à 100% pour la période du {formater_date(date_debut)} au {formater_date(date_fin)}"
         elif type_commentaire == 'SALAIRE':
-            return f"Modification du salaire de base à partir du {formater_date(date_effet)}"
+            return f"Modification du salaire de base à {accident.salaire_base}€ à partir du {formater_date(accident.date_consolidation)}"
         elif commentaire_texte:
             return commentaire_texte
         else:

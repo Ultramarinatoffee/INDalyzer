@@ -35,11 +35,14 @@ function RecapitulatifEtPeriode({ affilie, accident, dateAccident, setEtape }) {
         accident: accident.id,
         date_debut: dateDebut,
         date_fin: dateFin,
+
         type_reclamation: typeReclamation,
         type_commentaire: typeCommentaire,
-        pourcentage_ipp: pourcentageIPP,
-        date_effet: dateEffet,
-        commentaire_texte: commentaireTexte,
+        commentaire_texte: typeCommentaire === 'AUTRE' ? commentaireTexte : '',
+        pourcentage_ipp: accident.taux_IPP, 
+        date_effet: accident.date_consolidation,
+       
+       
       });
       console.log("Réponse reçue:", response.data);
       setResultatCalcul(response.data);
@@ -65,7 +68,7 @@ function RecapitulatifEtPeriode({ affilie, accident, dateAccident, setEtape }) {
       type_commentaire: typeCommentaire,
       pourcentage_ipp: pourcentageIPP,
       date_effet: dateEffet,
-      commentaire_texte: commentaireTexte,
+      commentaire_texte: typeCommentaire === 'AUTRE' ? commentaireTexte : '',
       generate_pdf: true
     }, {
       responseType: 'blob'
@@ -137,6 +140,7 @@ function RecapitulatifEtPeriode({ affilie, accident, dateAccident, setEtape }) {
 
       <p>Date de l'accident: {formaterDate(accident?.date_accident || dateAccident || 'Non défini')}</p>
       <p>Type: {accident?.type_accident_display || (accident?.type === 'AT' ? 'Accident de Travail' : 'Droit Commun') || 'Non défini'}</p>
+      <p>Date de consolidation: {formaterDate(accident?.date_consolidation) || 'N/A'}</p>
       <p>Taux IPP: {accident?.taux_IPP ? `${accident.taux_IPP}%` : 'N/A'}</p>
       <p>Salaire de base: {accident?.salaire_base ? `${accident.salaire_base}€` : 'N/A'}</p>
       {/* <p>Salaire de base: {accident?.salaire_base ? `${Number(accident.salaire_base).toFixed(2)}€` : 'N/A'}</p> */}
@@ -178,7 +182,7 @@ function RecapitulatifEtPeriode({ affilie, accident, dateAccident, setEtape }) {
         <option value="AUTRE">Autre</option>
       </select>
 
-      {(typeCommentaire === 'IPP' || typeCommentaire === 'AGGRAVATION') && (
+      {/* {(typeCommentaire === 'IPP' || typeCommentaire === 'AGGRAVATION') && (
         <div>
           <label>
             Pourcentage IPP:
@@ -202,7 +206,7 @@ function RecapitulatifEtPeriode({ affilie, accident, dateAccident, setEtape }) {
             />
           </label>
         </div>
-      )}
+      )} */}
 
       {typeCommentaire === 'AUTRE' && (
         <div>
