@@ -93,8 +93,13 @@ class CalculIndemniteViewSet(viewsets.ModelViewSet):
         data = request.data
         affilie_id = data.get('affilie')
         accident_id = data.get('accident')
-        date_debut = datetime.strptime(data.get('date_debut'), '%Y-%m-%d').date()
-        date_fin = datetime.strptime(data.get('date_fin'), '%Y-%m-%d').date()
+        
+        
+        # date_debut = datetime.strptime(data.get('date_debut'), '%Y-%m-%d').date()
+        # date_fin = datetime.strptime(data.get('date_fin'), '%Y-%m-%d').date()
+
+        is_manual_entry = data.get('is_manual_entry', False)
+
         type_reclamation = data.get('type_reclamation')
         type_commentaire = data['type_commentaire']
         commentaire_texte = data.get('commentaire_texte', '')
@@ -103,16 +108,39 @@ class CalculIndemniteViewSet(viewsets.ModelViewSet):
 
         # deboggage
         print("Données reçues du frontend:", data)
+        print("URL de la requête:", request.path)
+        print("Méthode de la requête:", request.method)
+        print("Données reçues complètes:", data)
+        print("Is manual entry:", data.get('is_manual_entry'))
+        print("Affilie ID:", data.get('affilie'))
+        print("Accident ID:", data.get('accident'))
+
+        if not affilie_id or not accident_id:
+            return Response({'error': 'Les IDs de l\'affilié et de l\'accident sont requis.'}, status=400)
+
 
         try:
             affilie = Affilie.objects.get(id=affilie_id)
             accident = Accident.objects.get(id=accident_id)
 
-            periodes = PeriodeIndemnisation.objects.filter(
-                affilie=affilie,
-                date_debut__lte=date_fin,
-                date_fin__gte=date_debut
-            ).order_by('date_debut')
+            if is_manual_entry:
+                periodes = data.get('periodes', [])
+                if not periodes:
+                    return Response({"error": "Aucune période fournie pour l'encodage manuel"}, status=400)
+                date_debut = min(datetime.strptime(p['dateDebut'], '%Y-%m-%d').date() for p in periodes)
+                date_fin = max(datetime.strptime(p['dateFin'], '%Y-%m-%d').date() for p in periodes)
+            else:
+                date_debut_str = data.get('date_debut')
+                date_fin_str = data.get('date_fin')
+                if not date_debut_str or not date_fin_str:
+                    return Response({'error': 'Les dates de début et de fin sont requises pour le calcul non manuel.'}, status=400)
+                date_debut = datetime.strptime(date_debut_str, '%Y-%m-%d').date()
+                date_fin = datetime.strptime(date_fin_str, '%Y-%m-%d').date()
+                periodes = PeriodeIndemnisation.objects.filter(
+                    affilie=affilie,
+                    date_debut__lte=date_fin,
+                    date_fin__gte=date_debut
+                ).order_by('date_debut')
 
             taux_ipp = Decimal(accident.taux_IPP) / 100
             salaire_base = Decimal(accident.salaire_base)
@@ -138,15 +166,19 @@ class CalculIndemniteViewSet(viewsets.ModelViewSet):
             total_general = Decimal('0')
 
             for periode in periodes:
-                debut_calcul = max(periode.date_debut, date_debut)
-                fin_calcul = min(periode.date_fin, date_fin)
-                nombre_jours = periode.nombre_jours
-                # nombre_jours = (fin_calcul - debut_calcul).days + 1
+                if is_manual_entry:
+                    debut_calcul = datetime.strptime(periode['dateDebut'], '%Y-%m-%d').date()
+                    fin_calcul = datetime.strptime(periode['dateFin'], '%Y-%m-%d').date()
+                    nombre_jours = int(periode['nombreJours'])
+                else:
+                    debut_calcul = max(periode.date_debut, date_debut)
+                    fin_calcul = min(periode.date_fin, date_fin)
+                    nombre_jours = periode.nombre_jours
 
-                if debut_calcul > periode.date_debut or fin_calcul < periode.date_fin:
-                    jours_totaux = (periode.date_fin - periode.date_debut).days + 1
-                    jours_calcules = (fin_calcul - debut_calcul).days + 1
-                    nombre_jours = int(nombre_jours * jours_calcules / jours_totaux)  
+                    if debut_calcul > periode.date_debut or fin_calcul < periode.date_fin:
+                        jours_totaux = (periode.date_fin - periode.date_debut).days + 1
+                        jours_calcules = (fin_calcul - debut_calcul).days + 1
+                        nombre_jours = int(nombre_jours * jours_calcules / jours_totaux)
 
                 montant_journalier_rente = (salaire_base * Decimal('0.8693') * taux_ipp) / 312
 
@@ -206,7 +238,6 @@ class CalculIndemniteViewSet(viewsets.ModelViewSet):
                 # Si la date est déjà une chaîne, on suppose qu'elle est au format YYYY-MM-DD
                 date = datetime.strptime(date, '%Y-%m-%d').date()
             return date.strftime('%d/%m/%Y') if date else 'date non définie'
-        
         if type_commentaire == 'IPP':
             return f"Reconnaissance d'une IPP de {accident.taux_IPP}% à partir du {formater_date(accident.date_consolidation)}"
         elif type_commentaire == 'AGGRAVATION':

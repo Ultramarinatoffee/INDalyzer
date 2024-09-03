@@ -21,6 +21,14 @@ function RecapitulatifEtPeriode({ affilie, accident, dateAccident, setEtape, isM
     nombreJours: '',
   });
 
+
+  useEffect(() => {
+    if (!affilie || !accident) {
+      console.error("Affilié ou accident non défini", { affilie, accident });
+      // Vous pouvez rediriger l'utilisateur ou afficher un message d'erreur ici
+    }
+  }, [affilie, accident]);
+
   // debogage, à supprimer
   useEffect(() => {
     console.log("RecapitulatifEtPeriode monté avec:", { affilie, accident });
@@ -41,10 +49,43 @@ function RecapitulatifEtPeriode({ affilie, accident, dateAccident, setEtape, isM
   };
 
   const handleCalcul = async (typeReclamation) => {
-    if (!dateDebut || !dateFin) {
-      alert("Veuillez sélectionner une période de calcul.");
+
+
+    if (!affilie) {
+      console.error("Affilié invalide:", affilie);
+      alert("Les informations de l'affilié sont manquantes.");
       return;
     }
+  
+    // Vérification si l'identifiant de l'affilié est manquant
+    if (!affilie.id) {
+      console.error("ID de l'affilié manquant:", affilie);
+      alert("L'identifiant de l'affilié est manquant.");
+      return;
+    }
+  
+    if (!accident || !accident.id) {
+      console.error("Accident invalide:", accident);
+      alert("Les informations de l'accident sont manquantes.");
+      return;
+    }
+
+    if (isManualEntry) {
+      if (periodes.length === 0) {
+        alert("Veuillez ajouter au moins une période.");
+        return;
+      }
+    } else {
+      if (!dateDebut || !dateFin) {
+        alert("Veuillez sélectionner une période de calcul.");
+        return;
+      }
+    }
+
+    // if (!dateDebut || !dateFin) {
+    //   alert("Veuillez sélectionner une période de calcul.");
+    //   return;
+    // }
 
     if (!typeCommentaire) {
       alert("Veuillez sélectionner un type de commentaire.");
@@ -52,28 +93,38 @@ function RecapitulatifEtPeriode({ affilie, accident, dateAccident, setEtape, isM
     }
 
     try {
-      console.log("Envoi de la requête avec:", { affilie, accident, dateDebut, dateFin, typeReclamation });
-      const response = await axios.post('/api/calculs/calculer_rente/', {
-        affilie: affilie.id,
-        accident: accident.id,
-        date_debut: dateDebut,
-        date_fin: dateFin,
+        const requestData = {
+          affilie: affilie.id,
+          accident: accident.id,
+          type_reclamation: typeReclamation,
+          type_commentaire: typeCommentaire,
+          commentaire_texte: typeCommentaire === 'AUTRE' ? commentaireTexte : '',
+          pourcentage_ipp: accident.taux_IPP,
+          date_effet: accident.date_consolidation,
+          is_manual_entry: isManualEntry,
+        };
 
-        type_reclamation: typeReclamation,
-        type_commentaire: typeCommentaire,
-        commentaire_texte: typeCommentaire === 'AUTRE' ? commentaireTexte : '',
-        pourcentage_ipp: accident.taux_IPP, 
-        date_effet: accident.date_consolidation,
-       
-       
-      });
-      console.log("Réponse reçue:", response.data);
-      setResultatCalcul(response.data);
-    } catch (error) {
-      console.error('Erreur lors du calcul:', error);
-      alert("Une erreur s'est produite lors du calcul.");
-    }
-  };
+        if (isManualEntry) {
+          requestData.periodes = periodes;
+        } else {
+          requestData.date_debut = dateDebut;
+          requestData.date_fin = dateFin;
+        }
+
+        console.log("URL de la requête:", '/api/calculs/calculer_rente/');
+        console.log("Données envoyées:", requestData);
+
+        console.log("Envoi de la requête avec:", requestData);
+        const response = await axios.post('/api/calculs/calculer_rente/', requestData);
+        console.log("Réponse reçue:", response.data);
+        setResultatCalcul(response.data);
+      } catch (error) {
+        console.error('Erreur lors du calcul:', error);
+        alert("Une erreur s'est produite lors du calcul.");
+      }
+    };
+
+  
 
   const handleGenererPDF = async () => {
     if (!resultatCalcul) {
@@ -210,9 +261,9 @@ function RecapitulatifEtPeriode({ affilie, accident, dateAccident, setEtape, isM
               <tbody>
                 {periodes.map((periode, index) => (
                   <tr key={index}>
-                    <td>{formaterDate(periode.dateDebut)}</td>
-                    <td>{formaterDate(periode.dateFin)}</td>
-                    <td>{periode.nombreJours}</td>
+                  <td>{formaterDate(periode.dateDebut)}</td>
+                  <td>{formaterDate(periode.dateFin)}</td>
+                  <td>{periode.nombreJours}</td>
                   </tr>
                 ))}
               </tbody>
