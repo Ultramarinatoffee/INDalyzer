@@ -15,6 +15,7 @@ function EncodageManuel({ setEtape, setAffilie, setAccident }) {
     isAssuralia: false,
     typeCalcul: ''
   });
+  
 
   const [showAccidentInfo, setShowAccidentInfo] = useState(false);
   const [showSpecificFields, setShowSpecificFields] = useState(false);

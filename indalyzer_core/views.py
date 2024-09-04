@@ -91,6 +91,10 @@ class CalculIndemniteViewSet(viewsets.ModelViewSet):
 
     def calculer_rente(self, request):
         data = request.data
+
+        # deboggage à supprimer
+        print("Données reçues pour calculer_rente:", data)
+
         affilie_id = data.get('affilie')
         accident_id = data.get('accident')
         
@@ -214,6 +218,8 @@ class CalculIndemniteViewSet(viewsets.ModelViewSet):
             }
 
             if generate_pdf:
+                # deboggage à supprimer
+                print("Génération du PDF...")
                 pdf_buffer = self.generer_rapport_pdf(resultat)
                 response = HttpResponse(content_type='application/pdf')
                 response['Content-Disposition'] = 'attachment; filename="rapport_rente.pdf"'
