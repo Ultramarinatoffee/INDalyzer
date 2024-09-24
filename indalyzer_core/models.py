@@ -9,8 +9,10 @@ class Affilie(models.Model):
     numero_externe = models.CharField(max_length=20, unique=True, verbose_name="Numéro externe", null=True, blank=True)
     nom = models.CharField(max_length=100)
     prenom = models.CharField(max_length=100)
-    date_naissance = models.DateField()
-    email = models.EmailField(default='example@example.com') # pour développer la fonction d'envoi d'une notification
+    # date_naissance = models.DateField()
+    date_naissance = models.DateField(null=True, blank=True)
+    email = models.EmailField(default='example@example.com') 
+    est_temporaire = models.BooleanField(default=False)
     
     def __str__(self):
         numero_externe = f": {self.numero_externe}" if self.numero_externe else "Aff: Non défini"
@@ -57,7 +59,9 @@ class Accident(models.Model):
         ('OCCASIONNEL', 'Chômeur occasionnel'),
         ('LONGUE_DUREE', 'Chômeur de longue durée'),
     ]
-    
+
+    statut_chomage = models.CharField(max_length=15, choices=STATUT_CHOMAGE, default='NON_APPLICABLE')
+        
     affilie = models.ForeignKey(Affilie, on_delete=models.CASCADE, related_name='accidents')
     date_accident = models.DateField(null=True, blank=True)
     source_donnees = models.CharField(max_length=10, choices=[('BD', 'Base de données'), ('MANUEL', 'Encodage manuel')])
@@ -68,6 +72,8 @@ class Accident(models.Model):
     salaire_base = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
     date_consolidation = models.DateField(null=True, blank=True)
     taux_IPP = models.PositiveIntegerField(null=True, blank=True, verbose_name="Taux d'IPP (%)")
+    est_temporaire = models.BooleanField(default=False) 
+    
 
 
         

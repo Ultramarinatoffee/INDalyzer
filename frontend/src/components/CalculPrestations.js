@@ -69,62 +69,7 @@ function CalculPrestations({ modeCalcul }) {
     }
   };
 
-  // const renderEtape = () => {
-  //   console.log('Rendering etape:', etape);
-  //   switch(etape) {
-  //     case 'recherche':
-  //       return <RechercheAffilie 
-  //         setEtape={(newEtape) => setEtapeAndMode(newEtape, false)} 
-  //         setAffilie={setAffilie} 
-  //       />;
-  //     case 'encodage':
-  //       return <EncodageManuel 
-  //         setEtape={(newEtape) => setEtapeAndMode(newEtape, true)}
-  //         setAffilie={setAffilie} 
-  //         setAccident={setAccident}
-  //         setDateAccident={setDateAccident}
-  //       />;
-  //     case 'detailsAccident':
-  //       return <DetailsAccident 
-  //         setEtape={(newEtape) => setEtapeAndMode(newEtape, false)}
-  //         setAccident={setAccident}
-  //         setDateAccident={setDateAccident}
-  //         affilie={affilie}
-  //       />;
-  //     case 'recapitulatif':
-  //       return <RecapitulatifEtPeriode 
-  //         affilie={affilie}
-  //         accident={accident}
-  //         dateAccident={dateAccident}
-  //         setEtape={(newEtape) => setEtapeAndMode(newEtape, isManualEntry)}
-  //         setPeriodeCalcul={setPeriodeCalcul}
-  //         isManualEntry={isManualEntry}
-  //       />;
-  //     default:
-  //       return <div>Étape inconnue</div>;
-  //   }
-  // };
   
-    
-  // const soumettreCalcul = async () => {
-  //   try {
-  //     const response = await axios.post('/api/calculs/', {
-  //       affilie: affilie.id,
-  //       accident: accident.id,
-  //       date_debut: periodeCalcul.dateDebut,
-  //       date_fin: periodeCalcul.dateFin,
-  //       type_reclamation: typeReclamation,
-  //       is_manual_entry: isManualEntry,
-  //       // Ajoutez d'autres données nécessaires
-  //     });
-  //     console.log('Calcul soumis avec succès:', response.data);
-  //     // Gérez la réponse (par exemple, afficher un message de succès, rediriger, etc.)
-  //   } catch (error) {
-  //     console.error('Erreur lors de la soumission du calcul:', error);
-  //     // Gérez l'erreur (par exemple, afficher un message d'erreur)
-  //   }
-  // };
-
   return (
     <div>
       <h2>Calcul de Prestations</h2>
@@ -133,17 +78,6 @@ function CalculPrestations({ modeCalcul }) {
     </div>
   );
 }
-
-//   return (
-//     <div>
-//       <h2>Calcul de Prestations</h2>
-//       {renderEtape()}
-//       {etape === 'recapitulatif' && (
-//         <button onClick={soumettreCalcul}>Soumettre le calcul</button>
-//       )}
-//     </div>
-//   );
-// }
 
 
 

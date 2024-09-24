@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { formaterDate } from '../utils';
+// import { formaterDate } from '../utils';
+import { formaterDate, formaterDatePourBackend } from '../utils';
 
 function RecapitulatifManuel({ handleCalcul }) {
   const [periodes, setPeriodes] = useState([]);
@@ -18,6 +19,7 @@ function RecapitulatifManuel({ handleCalcul }) {
       alert("Veuillez remplir tous les champs de la période.");
     }
   };
+  
 
   const onCalcul = (typeReclamation) => {
     if (periodes.length === 0) {
@@ -25,11 +27,53 @@ function RecapitulatifManuel({ handleCalcul }) {
       return;
     }
 
+    const formattedPeriodes = periodes.map(p => ({
+      dateDebut: formaterDatePourBackend(p.dateDebut),
+      dateFin: formaterDatePourBackend(p.dateFin),
+      nombreJours: parseInt(p.nombreJours, 10),
+      debut: formaterDatePourBackend(p.dateDebut),
+      fin: formaterDatePourBackend(p.dateFin)
+    }));
+
+    const dateDebut = formattedPeriodes.reduce((min, p) => p.dateDebut < min ? p.dateDebut : min, formattedPeriodes[0].dateDebut);
+    const dateFin = formattedPeriodes.reduce((max, p) => p.dateFin > max ? p.dateFin : max, formattedPeriodes[0].dateFin);
+
     handleCalcul({
-      periodes: periodes,
-      type_reclamation: typeReclamation,
+        date_debut: dateDebut,
+        date_fin: dateFin,
+        type_reclamation: typeReclamation,
+        periodes: formattedPeriodes,
+        is_manual_entry: true
     });
-  };
+};
+
+
+  //   const dateDebut = periodes.reduce((min, p) => p.dateDebut < min ? p.dateDebut : min, periodes[0].dateDebut);
+  //   const dateFin = periodes.reduce((max, p) => p.dateFin > max ? p.dateFin : max, periodes[0].dateFin);
+    
+  
+  //   handleCalcul({
+  //     date_debut: dateDebut,  // Pas besoin de reformater ici, déjà au format YYYY-MM-DD
+  //     date_fin: dateFin,      // Pas besoin de reformater ici, déjà au format YYYY-MM-DD
+  //     type_reclamation: typeReclamation,
+  //     periodes: periodes.map(p => ({   
+  //       dateDebut: p.dateDebut,
+  //       dateFin: p.dateFin,
+  //       nombreJours: parseInt(p.nombreJours, 10), // Conversion en entier pour le backend
+  //       debut: p.dateDebut,  // Compatibilité avec le backend
+  //       fin: p.dateFin       // Compatibilité avec le backend
+  //     })),
+  //     is_manual_entry: true
+      
+  //   });
+  // };
+  // print("fin de if is manuel entry", data)
+
+  //   handleCalcul({
+  //     periodes: periodes,
+  //     type_reclamation: typeReclamation,
+  //   });
+  // };
 
   return (
     <>

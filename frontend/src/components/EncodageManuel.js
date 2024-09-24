@@ -1,7 +1,11 @@
 import React, { useState, useEffect } from 'react';
+import axios from 'axios'; 
+import { formaterDatePourBackend } from '../utils';
 
 function EncodageManuel({ setEtape, setAffilie, setAccident }) {
   const [formData, setFormData] = useState({
+
+    
     nom: '',
     prenom: '',
     numero_registre_national: '',
@@ -41,33 +45,101 @@ function EncodageManuel({ setEtape, setAffilie, setAccident }) {
     setShowCalculFields(calculTypeSelected && formData.typeCalcul === 'IPP');
   }, [formData]);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    setAffilie({
-      nom: formData.nom,
-      prenom: formData.prenom,
-      numero_registre_national: formData.numero_registre_national,
-      date_naissance: formData.date_naissance,
-      estTemporaire: true
-    });
+    // const tempAffilieId = `temp_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    // const tempAccidentId = `temp_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 
-    setAccident({
-      type: formData.typeAccident,
-      date: formData.dateAccident,
-      date_accident: formData.dateAccident,
-      salaire_base: formData.typeAccident === 'AT' ? formData.salaireBase : undefined,
-      date_consolidation: formData.dateConsolidation,
-      taux_IPP: formData.tauxIPP,
-      statut_chomage: formData.typeAccident === 'DC' ? formData.statutChomage : undefined,
-      is_assuralia: formData.typeAccident === 'DC' ? formData.isAssuralia : undefined,
-      type_calcul: formData.typeCalcul,
-      estTemporaire: true,
-      type_accident_display: formData.typeAccident === 'AT' ? 'Accident de Travail' : 'Droit Commun' 
-    });
+
+    try {
+      // Étape 1 : Créer l'affilié
+      const affilieResponse = await axios.post('/api/affilies/', {
+        nom: formData.nom,
+        prenom: formData.prenom,
+        numero_registre_national: formData.numero_registre_national,
+        // date_naissance: formData.date_naissance || null,
+
+        date_naissance: formaterDatePourBackend(formData.date_naissance) || null,
+
+        email: 'example@example.com', 
+        est_temporaire: true
+      });
+
+      const affilieData = affilieResponse.data;
+      setAffilie(affilieData);
+
+      console.log("Affilié créé :", affilieData);
+
+      // Étape 2 : Créer l'accident
+      const accidentPayload = {
+        affilie: affilieData.id,
+        // date_accident: formData.dateAccident,
+
+        date_accident: formaterDatePourBackend(formData.dateAccident),
+
+        source_donnees: 'MANUEL',
+        type_accident: formData.typeAccident,
+        statut_chomage: formData.statutChomage || 'NON',
+        convention_assuralia: formData.isAssuralia || false,
+        salaire_base: formData.salaireBase || null,
+        // date_consolidation: formData.dateConsolidation || null,
+
+        date_consolidation: formaterDatePourBackend(formData.dateConsolidation) || null,
    
 
-    setEtape('recapitulatif', true);
+        taux_IPP: formData.tauxIPP || null,
+        est_temporaire: true
+      };
+
+       console.log("Payload de l'accident :", accidentPayload);
+
+      const accidentResponse = await axios.post('/api/accidents/', accidentPayload);
+      const accidentData = accidentResponse.data;
+      setAccident(accidentData);
+
+      // Passer à l'étape suivante
+      setEtape('recapitulatif', true);
+    } catch (error) {
+      console.error("Erreur lors de la création de l'affilié ou de l'accident :", error);
+    
+      if (error.response) {
+        console.error('Erreur réponse:', error.response.data);
+        alert(`Erreur lors de l'enregistrement : ${JSON.stringify(error.response.data)}`);
+      } else {
+        alert("Une erreur est survenue lors de l'enregistrement des informations. Veuillez réessayer.");
+      }
+    }
   };
+
+    // const affilieData = {
+    //   id: tempAffilieId,
+    //   nom: formData.nom,
+    //   prenom: formData.prenom,
+    //   numero_registre_national: formData.numero_registre_national,
+    //   date_naissance: formData.date_naissance,
+    //   estTemporaire: true
+    // };
+
+    // const accidentData = {
+    //   id: tempAccidentId,
+    //   type: formData.typeAccident,
+    //   date: formData.dateAccident,
+    //   date_accident: formData.dateAccident,
+    //   salaire_base: formData.typeAccident === 'AT' ? formData.salaireBase : undefined,
+    //   date_consolidation: formData.dateConsolidation,
+    //   taux_IPP: formData.tauxIPP,
+    //   statut_chomage: formData.typeAccident === 'DC' ? formData.statutChomage : undefined,
+    //   is_assuralia: formData.typeAccident === 'DC' ? formData.isAssuralia : undefined,
+    //   type_calcul: formData.typeCalcul,
+    //   estTemporaire: true,
+    //   type_accident_display: formData.typeAccident === 'AT' ? 'Accident de Travail' : 'Droit Commun' 
+    // };
+
+   
+    // setAffilie(affilieData);
+    // setAccident(accidentData);
+    // setEtape('recapitulatif', true);
+  // };
 
   return (
     <form onSubmit={handleSubmit}>

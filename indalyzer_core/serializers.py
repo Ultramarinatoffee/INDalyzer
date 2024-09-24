@@ -9,23 +9,27 @@ class PeriodeIndemnisationSerializer(serializers.ModelSerializer):
 
 class AccidentSerializer(serializers.ModelSerializer):
     
+    affilie = serializers.PrimaryKeyRelatedField(queryset=Affilie.objects.all())
     date_accident = serializers.DateField(format='%d/%m/%Y')
     date_consolidation = serializers.DateField(format='%d/%m/%Y', required=False)
-    type_accident_display = serializers.CharField(source='get_type_accident_display')
+    # type_accident_display = serializers.CharField(source='get_type_accident_display')
+    type_accident_display = serializers.CharField(source='get_type_accident_display', read_only=True)
     taux_IPP = serializers.IntegerField(min_value=0, max_value=100, required=False)
 
     class Meta:
         model = Accident
-        fields = ['id', 'date_accident', 'type_accident', 'type_accident_display', 
-                  'date_consolidation', 'taux_IPP', 'salaire_base', 'statut_chomage', 
-                  'convention_assuralia']
+        fields = ['id', 'affilie', 'date_accident', 'type_accident', 'type_accident_display',
+                  'date_consolidation', 'taux_IPP', 'salaire_base', 'statut_chomage',
+                  'convention_assuralia', 'est_temporaire']
 
 class AffilieSerializer(serializers.ModelSerializer):
     accidents = AccidentSerializer(many=True, read_only=True)
+    date_naissance = serializers.DateField(required=False, allow_null=True)
 
     class Meta:
         model = Affilie
-        fields = ['id', 'numero_registre_national', 'numero_externe', 'nom', 'prenom', 'date_naissance', 'email', 'accidents']
+        fields = ['id', 'numero_registre_national', 'numero_externe', 'nom', 'prenom', 'date_naissance', 'email', 'accidents', 'est_temporaire']
+
 
 class CalculIndemniteSerializer(serializers.ModelSerializer):
     class Meta:

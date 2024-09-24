@@ -1,85 +1,46 @@
 export const formaterDate = (dateString) => {
-    if (!dateString) return 'date non définie';
+    if (!dateString) return 'Date non définie';
 
-    // Vérifier si le format est DD/MM/YYYY
-    const dateParts = dateString.split('/');
-    if (dateParts.length === 3) {
-        // Convertir en format YYYY-MM-DD pour une meilleure compatibilité avec le constructeur Date
-        const formattedDate = `${dateParts[2]}-${dateParts[1]}-${dateParts[0]}`;
-        const date = new Date(formattedDate);
-
-        // Vérifier si la date est valide
-        if (isNaN(date.getTime())) {
-            return 'Date non valide';
-        }
-
-        return date.toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit', year: 'numeric' });
+    // Vérifier si la date est au format 'YYYY-MM-DD'
+    if (/^\d{4}-\d{2}-\d{2}$/.test(dateString)) {
+        const [year, month, day] = dateString.split('-');
+        return `${day}/${month}/${year}`;
     }
 
-    // Sinon, tenter de créer la date directement
-    const date = new Date(dateString);
-    if (isNaN(date.getTime())) return 'Date non valide'; // Gérer les cas où la date n'est pas valide
-    return date.toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit', year: 'numeric' });
-};
-
-export const formaterDatePourBackend = (dateString) => {
-    if (!dateString) return '';
-
-    // Si la date est déjà au format YYYY-MM-DD, la retourner telle quelle
-    if (/^\d{4}-\d{2}-\d{2}$/.test(dateString)) {
+    // Vérifier si la date est au format 'DD/MM/YYYY'
+    if (/^\d{2}\/\d{2}\/\d{4}$/.test(dateString)) {
+        // La date est déjà au bon format
         return dateString;
     }
 
-    // Vérifier si le format est DD/MM/YYYY
-    const dateParts = dateString.split('/');
-    if (dateParts.length === 3) {
-        // Convertir en format YYYY-MM-DD
-        return `${dateParts[2]}-${dateParts[1].padStart(2, '0')}-${dateParts[0].padStart(2, '0')}`;
-    }
-
-    // Tenter de créer la date directement
+    // Tenter de créer un objet Date
     const date = new Date(dateString);
-    if (isNaN(date.getTime())) return ''; // Retourner une chaîne vide si la date n'est pas valide
+    if (isNaN(date.getTime())) return 'Date non valide';
 
-    // Formater la date en YYYY-MM-DD
-    return date.toISOString().split('T')[0];
+    const day = (`0${date.getDate()}`).slice(-2);
+    const month = (`0${date.getMonth() + 1}`).slice(-2); // Les mois commencent à 0 en JavaScript
+    const year = date.getFullYear();
+
+    return `${day}/${month}/${year}`;
 };
 
+export const formaterDatePourBackend = (dateString) => {
+    if (!dateString) {
+        console.error('Date invalide ou vide:', dateString);
+        return null; // Utilisez null au lieu de ''
+    }
 
-// export const formaterDate = (dateString) => {
-//     if (!dateString) return 'date non définie';
-//     const date = new Date(dateString);
-//     return date.toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit', year: 'numeric' });
-//   };
+    // Vérifier si la date est au format 'DD/MM/YYYY'
+    if (/^\d{2}\/\d{2}\/\d{4}$/.test(dateString)) {
+        const [day, month, year] = dateString.split('/');
+        return `${year}-${month}-${day}`;
+    }
+    // Vérifier si la date est au format 'YYYY-MM-DD'
+    else if (/^\d{4}-\d{2}-\d{2}$/.test(dateString)) {
+        return dateString;
+    } else {
+        console.error('Format de date inconnu:', dateString);
+        return null; // Utilisez null au lieu de ''
+    }
+};
 
-//   export const formaterDate = (dateString) => {
-//     if (!dateString) return 'date non définie';
-
-//     const date = new Date(dateString);
-
-//     // Vérifier si la date est valide
-//     if (isNaN(date.getTime())) {
-//         return 'Date non valide';
-//     }
-
-//     return date.toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit', year: 'numeric' });
-// };
-
-// export const formaterDate = (dateString) => {
-//     if (!dateString) return 'date non définie';
-  
-//     // Vérifier si le format est DD/MM/YYYY
-//     const dateParts = dateString.split('/');
-//     if (dateParts.length === 3) {
-//       // Convertir en format YYYY-MM-DD pour une meilleure compatibilité avec le constructeur Date
-//       const formattedDate = `${dateParts[2]}-${dateParts[1]}-${dateParts[0]}`;
-//       const date = new Date(formattedDate);
-//       return date.toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit', year: 'numeric' });
-//     }
-  
-//     // Sinon, tenter de créer la date directement
-//     const date = new Date(dateString);
-//     if (isNaN(date)) return 'date non valide'; // Gérer les cas où la date n'est pas valide
-//     return date.toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit', year: 'numeric' });
-//   };
-  
