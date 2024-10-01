@@ -6,7 +6,10 @@ import RecapitulatifManuel from './RecapitulatifManuel';
 
 function RecapitulatifEtPeriode({ affilie, accident, dateAccident, setEtape, isManualEntry }) {
   const [resultatCalcul, setResultatCalcul] = useState(null);
-  const [typeCommentaire, setTypeCommentaire] = useState('');
+  // const [typeCommentaire, setTypeCommentaire] = useState('');
+
+  const [typeCalcul, setTypeCalcul] = useState('');
+
   const [commentaireTexte, setCommentaireTexte] = useState('');
   const [donneesCalcul, setDonneesCalcul] = useState({});
 
@@ -43,8 +46,13 @@ function RecapitulatifEtPeriode({ affilie, accident, dateAccident, setEtape, isM
     affilie: affilie.id,
     accident: accident.id,
     is_manual_entry: isManualEntry,
-    type_commentaire: typeCommentaire,
-    commentaire_texte: typeCommentaire === 'AUTRE' ? commentaireTexte : '',
+
+    // type_commentaire: typeCommentaire,
+    // commentaire_texte: typeCommentaire === 'AUTRE' ? commentaireTexte : '',
+
+    type_calcul: typeCalcul,
+    commentaire_texte: commentaireTexte,
+
     // date_accident: accident.date_accident,
     date_accident: formaterDatePourBackend(accident.date_accident),
     type_accident: accident.type_accident,
@@ -212,8 +220,13 @@ function RecapitulatifEtPeriode({ affilie, accident, dateAccident, setEtape, isM
       <p>Salaire de base: {accident?.salaire_base ? `${accident.salaire_base}€` : 'N/A'}</p>
 
       
-      <h3>Commentaire</h3>
-      <select value={typeCommentaire} onChange={(e) => setTypeCommentaire(e.target.value)}>
+      <h3>Type de calcul</h3>
+
+
+      {/* <select value={typeCommentaire} onChange={(e) => setTypeCommentaire(e.target.value)}> */}
+
+      <select value={typeCalcul} onChange={(e) => setTypeCalcul(e.target.value)}>
+
         <option value="" disabled>Sélectionner le motif</option>
         <option value="IPP">Reconnaissance d'une IPP</option>
         <option value="AGGRAVATION">Aggravation d'une IPP</option>
@@ -222,7 +235,7 @@ function RecapitulatifEtPeriode({ affilie, accident, dateAccident, setEtape, isM
         <option value="AUTRE">Autre</option>
       </select>
 
-      {typeCommentaire === 'AUTRE' && (
+      {typeCalcul === 'AUTRE' && (
         <div>
           <label>
             Commentaire:
@@ -233,6 +246,18 @@ function RecapitulatifEtPeriode({ affilie, accident, dateAccident, setEtape, isM
           </label>
         </div>
       )}
+
+      {/* {typeCommentaire === 'AUTRE' && (
+        <div>
+          <label>
+            Commentaire:
+            <textarea
+              value={commentaireTexte}
+              onChange={(e) => setCommentaireTexte(e.target.value)}
+            />
+          </label>
+        </div>
+      )} */}
 
       {isManualEntry ? (
         <RecapitulatifManuel handleCalcul={handleCalcul} />
