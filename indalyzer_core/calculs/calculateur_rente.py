@@ -11,7 +11,7 @@ class CalculateurRente(ABC):
         self.accident = accident
         self.data = data
         self.is_manual_entry = is_manual_entry
-
+        self.statut_chomage = data.get('statut_chomage', 'NON')
 
 
         #  Modifications après avoir modifier commentaire à type de calcul:    
@@ -48,7 +48,7 @@ class CalculateurRente(ABC):
 
 
         self.resultat = {}
-        self.periodes = []
+        self.periodes = data.get('periodes', [])
         self.total_general = Decimal('0')
         self.date_debut = None
         self.date_fin = None

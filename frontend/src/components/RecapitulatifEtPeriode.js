@@ -26,21 +26,6 @@ function RecapitulatifEtPeriode({ affilie, accident, dateAccident, setEtape, isM
       return;
     }
 
-  // const handleCalcul = async (donneesSpecifiques) => {
-  //    if (!affilie) {
-  //     console.error("Affilié invalide:", affilie);
-  //     alert("Les informations de l'affilié sont manquantes.");
-  //     return;
-  //   }
-
-  //   // Vérification si l'identifiant de l'affilié est manquant
-  //   if (!affilie.id) {
-  //     console.error("ID de l'affilié manquant:", affilie);
-  //     alert("L'identifiant de l'affilié est manquant.");
-  //     return;
-  //   }
-
-
 
   const donneesCompletes = {
     affilie: affilie.id,
@@ -64,6 +49,10 @@ function RecapitulatifEtPeriode({ affilie, accident, dateAccident, setEtape, isM
     taux_IPP: accident.taux_IPP,
     ...donneesSpecifiques
   };
+
+    // debogage
+    console.log('Type de accident.convention_assuralia:', typeof accident.convention_assuralia);
+
 
     setDonneesCalcul(donneesCompletes);
 
@@ -247,18 +236,28 @@ function RecapitulatifEtPeriode({ affilie, accident, dateAccident, setEtape, isM
         </div>
       )}
 
-      {/* {typeCommentaire === 'AUTRE' && (
-        <div>
-          <label>
-            Commentaire:
-            <textarea
-              value={commentaireTexte}
-              onChange={(e) => setCommentaireTexte(e.target.value)}
-            />
-          </label>
-        </div>
-      )} */}
+      {isManualEntry ? (
+              <RecapitulatifManuel handleCalcul={handleCalcul} accident={accident} />
+            ) : (
+              <RecapitulatifAuto handleCalcul={handleCalcul} accident={accident} />
+            )}
 
+            {resultatCalcul && (
+              <div>
+                <h3>Résultat du calcul</h3>
+                {resultatCalcul.commentaire && <p>{resultatCalcul.commentaire}</p>}
+                {renderTableauResultats()}
+                <button onClick={handleGenererPDF}>Générer PDF</button>
+              </div>
+            )}
+          </div>
+        );
+      }
+
+export default RecapitulatifEtPeriode;
+
+
+{/* 
       {isManualEntry ? (
         <RecapitulatifManuel handleCalcul={handleCalcul} />
       ) : (
@@ -279,4 +278,4 @@ function RecapitulatifEtPeriode({ affilie, accident, dateAccident, setEtape, isM
 
 export default RecapitulatifEtPeriode;
 
-
+ */}
