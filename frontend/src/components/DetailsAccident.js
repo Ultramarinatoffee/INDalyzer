@@ -135,7 +135,6 @@ function DetailsAccident({ setEtape, setDateAccident, setAccident, affilie }) {
         <button onClick={() => setEtape('recapitulatif')}>Suivant</button>
       )}
 
-      <button onClick={() => setEtape('choixReclamation')}>Nouvel accident</button>
     </div>
   );
 }

@@ -161,6 +161,8 @@ function RecapitulatifEtPeriode({ affilie, accident, dateAccident, setEtape, isM
   const renderTableauResultats = () => {
     if (!resultatCalcul || !resultatCalcul.periodes) return null;
 
+    
+
     return (
       <table>
         <thead>
@@ -219,7 +221,7 @@ function RecapitulatifEtPeriode({ affilie, accident, dateAccident, setEtape, isM
         <option value="" disabled>Sélectionner le motif</option>
         <option value="IPP">Reconnaissance d'une IPP</option>
         <option value="AGGRAVATION">Aggravation d'une IPP</option>
-        <option value="ITT">Reconnaissance d'une ITT à 100%</option>
+        <option value="ITT">Reconnaissance d'une ITT</option>
         <option value="SALAIRE">Modification du salaire de base</option>
         <option value="AUTRE">Autre</option>
       </select>

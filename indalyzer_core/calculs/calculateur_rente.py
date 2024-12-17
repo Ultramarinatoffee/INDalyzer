@@ -49,6 +49,7 @@ class CalculateurRente(ABC):
 
         self.resultat = {}
         self.periodes = data.get('periodes', [])
+        print("Périodes initialisées :", self.periodes)
         self.total_general = Decimal('0')
         self.date_debut = None
         self.date_fin = None
@@ -60,7 +61,7 @@ class CalculateurRente(ABC):
         elif self.type_calcul == 'AGGRAVATION':
             return f"{self.type_accident} - Aggravation d'une IPP à {self.accident.taux_IPP}% à partir du {self.formater_date(self.accident.date_consolidation)}"
         elif self.type_calcul == 'ITT':
-            return f"{self.type_accident} - Reconnaissance d'une ITT à 100% pour la période du {self.formater_date(self.date_debut)} au {self.formater_date(self.date_fin)}"
+            return f"{self.type_accident} - Reconnaissance d'une ITT pour la période du {self.formater_date(self.date_debut)} au {self.formater_date(self.date_fin)}"
         elif self.type_calcul == 'SALAIRE':
             return f"{self.type_accident} - Modification du salaire de base à {self.salaire_base}€ à partir du {self.formater_date(self.accident.date_consolidation)}"
         elif self.commentaire_texte:
