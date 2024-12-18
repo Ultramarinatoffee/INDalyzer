@@ -26,6 +26,7 @@ class CalculDCSansAssuralia(CalculateurRente):
             debut_str = p.get('dateDebut') or p.get('debut')
             fin_str = p.get('dateFin') or p.get('fin')
             taux_applicable = Decimal(p.get('taux', '100')) / 100  # Par défaut 100%
+            taux_pourcent = int(taux_applicable * 100)
 
             if not debut_str or not fin_str:
                 raise ValueError(f"Les dates de début et de fin sont requises pour la période {idx + 1}.")
@@ -79,7 +80,10 @@ class CalculDCSansAssuralia(CalculateurRente):
                     'fin': self.formater_date(date_fin_periode),
                     'nombre_jours': nombre_jours_periode,
                     'taux_journalier': taux_journalier,
-                    'taux_applicable': taux_applicable,
+
+                    # modification du 17/12/2024
+                    # 'taux_applicable': taux_applicable,
+                    'taux_applicable': taux_pourcent,
                     'montant_journalier_rente': montant_journalier,
                     'debut_date': date_debut_periode,
                     'fin_date': date_fin_periode
@@ -113,6 +117,7 @@ class CalculDCSansAssuralia(CalculateurRente):
             'periodes': self.periodes_calcul,
             'total_general': float(self.total_general),
             'commentaire': self.generer_commentaire(),
+            'dc_sans_assuralia': True
         }
         return self.resultat
 

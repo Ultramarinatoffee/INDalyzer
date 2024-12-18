@@ -95,6 +95,8 @@ class CalculIndemniteViewSet(viewsets.ModelViewSet):
         # Débogage
         print("Données reçues pour calculer_rente:", data)
 
+        
+
         affilie_id = data.get('affilie')
         accident_id = data.get('accident')
         is_manual_entry = data.get('is_manual_entry', False)
@@ -166,11 +168,27 @@ class CalculIndemniteViewSet(viewsets.ModelViewSet):
             # Espacement supplémentaire avant le tableau
             y -= 20
 
+            # Vérifier si on doit afficher la colonne "Dégressivité" (que pour DC sans Assuralia)
+            afficher_degressivite = data.get('dc_sans_assuralia', False)
+
             # Dessiner le tableau des périodes
             p.drawString(50, y, "Période")
             p.drawString(200, y, "Nombre de jours")
             p.drawString(350, y, "Montant journalier")
-            p.drawString(500, y, "Total")
+
+            if afficher_degressivite:
+                # On décale la colonne "Total" un peu plus à droite
+                p.drawString(480, y, "Dégressivité")
+                x_total = 550
+            else:
+                x_total = 500
+
+            p.drawString(x_total, y, "Total")
+
+                # p.drawString(500, y, "Total")
+
+
+
             y -= 20
 
             for idx, periode in enumerate(data['periodes']):
@@ -183,7 +201,17 @@ class CalculIndemniteViewSet(viewsets.ModelViewSet):
                 p.drawString(50, y, f"{debut} - {fin}")
                 p.drawString(200, y, str(nombre_jours))
                 p.drawString(350, y, f"{montant_journalier:.2f}€")
-                p.drawString(500, y, f"{total:.2f}€")
+                # p.drawString(500, y, f"{total:.2f}€")
+                # y -= 20
+
+                if afficher_degressivite:
+                    # Récupérer le taux_applicable en pourcentage entier
+                    taux_applicable = periode.get('taux_applicable', 100)  
+                    # Ici, taux_applicable est déjà un entier (ex: 80 pour 80%)
+                    p.drawString(480, y, f"{taux_applicable}%")
+                    p.drawString(x_total, y, f"{total:.2f}€")
+                else:
+                    p.drawString(x_total, y, f"{total:.2f}€")
                 y -= 20
 
             p.drawString(250, y - 20, "Total général:")
