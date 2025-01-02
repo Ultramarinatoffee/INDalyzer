@@ -21,129 +21,128 @@ function RecapitulatifAuto({ handleCalcul, accident }) {
 
 
   const ajouterPeriode = () => {
-    // Vérifier si la dernière période est complète
-    const dernierePeriode = periodes[periodes.length - 1];
-    if (dernierePeriode && (!dernierePeriode.debut || !dernierePeriode.fin || !dernierePeriode.taux)) {
-      alert("Veuillez compléter la période en cours avant d'en ajouter une nouvelle.");
-      return;
+    // Contrôle que la dernière période soit complète
+    const derniere = periodes[periodes.length - 1];
+    if (derniere) {
+      const { debut, fin, taux } = derniere;
+      // Dans le cas "DC sans Assuralia" => taux requis
+      // Dans le cas "DC avec Assuralia" ou AT => pas de taux
+      // => On gère la condition
+      if (!debut || !fin) {
+        alert("Veuillez compléter la date de début et de fin de la dernière période.");
+        return;
+      }
+      // Si c’est DC sans Assuralia, il faut un taux
+      if (
+        accident.type_accident === 'DC'
+        && !accident.convention_assuralia
+        && !taux
+      ) {
+        alert("Veuillez saisir un taux (%) pour la dernière période.");
+        return;
+      }
     }
+
+    // On ajoute la nouvelle période
     setPeriodes([...periodes, { debut: '', fin: '', taux: '100' }]);
   };
 
+  // Modification d’un champ d’une période
   const handlePeriodeChange = (index, field, value) => {
-    const newPeriodes = [...periodes];
-    newPeriodes[index][field] = value;
-    setPeriodes(newPeriodes);
+    const copie = [...periodes];
+    copie[index][field] = value;
+    setPeriodes(copie);
   };
 
-
-
-  // const onCalcul = () => {
-  //   // Validation des données
-  //   if (accident.type_accident === 'DC') {
-  //     if (accident.convention_assuralia) {
-  //       if (!dateDebut || !dateFin) {
-  //         alert("Veuillez saisir les dates de début et de fin.");
-  //         return;
-  //       }
-  //     } else {
-  //       if (periodes.length === 0) {
-  //         alert("Veuillez ajouter au moins une période.");
-  //         return;
-  //       }
-  //     }
-  //   } else {
-  //     // Pour les AT ou autres
-  //     if (!dateDebut || !dateFin) {
-  //       alert("Veuillez sélectionner une période de calcul.");
-  //       return;
-  //     }
-  //   }
-
-  //   const donneesSpecifiques = {
-  //     date_debut: dateDebut,
-  //     date_fin: dateFin,
-  //     periodes: periodes.map(p => ({
-  //       dateDebut: p.debut,
-  //       dateFin: p.fin,
-  //       taux: p.taux
-  //     })),
-  //   };
-
-
-
-  //   handleCalcul(donneesSpecifiques);
-  // };
-
+  // Au clic sur "Calculer"
   const onCalcul = () => {
-    // Validation des données
     if (accident.type_accident === 'DC' && !accident.convention_assuralia) {
-      // DC sans Assuralia
+      // BLOC 1 : DC sans Assuralia => On attend un tableau "periodes"
       if (periodes.length === 0) {
-        alert("Veuillez ajouter au moins une période.");
+        alert("Veuillez ajouter au moins une période (DC sans Assuralia).");
         return;
       }
-      // Vérifier que toutes les périodes sont complètes
+      // Vérif que chaque période est complète
       for (let i = 0; i < periodes.length; i++) {
-        const periode = periodes[i];
-        if (!periode.debut || !periode.fin || !periode.taux) {
-          alert(`Veuillez compléter toutes les informations pour la période ${i + 1}.`);
+        const { debut, fin, taux } = periodes[i];
+        if (!debut || !fin || !taux) {
+          alert(`Veuillez compléter toutes les infos pour la période #${i+1}.`);
           return;
         }
       }
-      // Construire les données spécifiques
+      // Construit l’objet
       const donneesSpecifiques = {
         periodes: periodes.map(p => ({
           dateDebut: p.debut,
-          dateFin: p.fin,
-          taux: p.taux
+          dateFin:   p.fin,
+          taux:      p.taux,
         })),
       };
       handleCalcul(donneesSpecifiques);
+
     } else {
-      // DC avec Assuralia ou AT
-      if (!dateDebut || !dateFin) {
-        alert("Veuillez saisir les dates de début et de fin.");
+      // BLOC 2 : DC avec Assuralia ou AT => On saisit TOUTES les périodes, mais sans "taux"
+      //   OU on veut un "range" unique ? => Minimal change : vous vouliez plusieurs périodes
+      //   alors on fait comme ci-dessous.
+
+      if (periodes.length === 0) {
+        // si vous désirez conserver un champ dateDebut/dateFin unique => on l’utilise
+        // Mais vous disiez que vous vouliez "plusieurs périodes" => on fait la même mécanique
+        alert("Veuillez ajouter au moins une période (AT ou DC avec Assuralia).");
         return;
       }
-      // Construire les données spécifiques
+      // Contrôle
+      for (let i = 0; i < periodes.length; i++) {
+        const { debut, fin } = periodes[i];
+        if (!debut || !fin) {
+          alert(`Veuillez compléter les dates pour la période #${i+1}.`);
+          return;
+        }
+      }
+
+      // On n’envoie pas "taux" => ou on l’ignore
       const donneesSpecifiques = {
-        date_debut: dateDebut,
-        date_fin: dateFin,
+        periodes: periodes.map(p => ({
+          dateDebut: p.debut,
+          dateFin:   p.fin,
+          // pas de dégressivité => on n’envoie pas "taux" ou on l’ignore
+        })),
       };
       handleCalcul(donneesSpecifiques);
     }
   };
-  
+
   return (
     <>
+      {/* BLOC 1 : DC sans Assuralia => on affiche la case "taux (%)" */}
       {accident.type_accident === 'DC' && !accident.convention_assuralia && (
         <div>
-          <h3>Périodes d'ITT avec taux (Dégressivité)</h3>
-          {periodes.map((periode, index) => (
-            <div key={index}>
+          <h3>Périodes (DC sans Assuralia) avec taux (%)</h3>
+          {periodes.map((periode, idx) => (
+            <div key={idx}>
               <label>
                 Date début:
                 <input
                   type="date"
                   value={periode.debut}
-                  onChange={(e) => handlePeriodeChange(index, 'debut', e.target.value)}
+                  onChange={(e) => handlePeriodeChange(idx, 'debut', e.target.value)}
                 />
               </label>
-              <label>
+              <label style={{ marginLeft: '10px' }}>
                 Date fin:
                 <input
                   type="date"
                   value={periode.fin}
-                  onChange={(e) => handlePeriodeChange(index, 'fin', e.target.value)}
+                  onChange={(e) => handlePeriodeChange(idx, 'fin', e.target.value)}
                 />
               </label>
-              <label>
+              <label style={{ marginLeft: '10px' }}>
                 Taux applicable (%):
                 <input
                   type="number"
                   value={periode.taux}
-                  onChange={(e) => handlePeriodeChange(index, 'taux', e.target.value)}
+                  onChange={(e) => handlePeriodeChange(idx, 'taux', e.target.value)}
+                  style={{ width: '70px' }}
                 />
               </label>
             </div>
@@ -152,34 +151,40 @@ function RecapitulatifAuto({ handleCalcul, accident }) {
         </div>
       )}
 
-      {(accident.type_accident === 'DC' && accident.convention_assuralia) || accident.type_accident === 'AT' ? (
+      {/* BLOC 2 : DC avec Assuralia ou AT => on affiche plusieurs périodes
+          mais pas de champ "taux (%)". */}
+      {((accident.type_accident === 'DC' && accident.convention_assuralia)
+        || accident.type_accident === 'AT') && (
         <div>
-          <h3>Période de calcul souhaitée</h3>
-          <div>
-            <label>
-              Date de début:
-              <input
-                type="date"
-                value={dateDebut}
-                onChange={(e) => setDateDebut(e.target.value)}
-                required
-              />
-            </label>
-          </div>
-          <div>
-            <label>
-              Date de fin:
-              <input
-                type="date"
-                value={dateFin}
-                onChange={(e) => setDateFin(e.target.value)}
-                required
-              />
-            </label>
-          </div>
+          <h3>
+            Périodes ({accident.type_accident === 'AT' ? "Accident Travail" : "DC avec Assuralia"})
+          </h3>
+          {periodes.map((periode, idx) => (
+            <div key={idx}>
+              <label>
+                Date début:
+                <input
+                  type="date"
+                  value={periode.debut}
+                  onChange={(e) => handlePeriodeChange(idx, 'debut', e.target.value)}
+                />
+              </label>
+              <label style={{ marginLeft: '10px' }}>
+                Date fin:
+                <input
+                  type="date"
+                  value={periode.fin}
+                  onChange={(e) => handlePeriodeChange(idx, 'fin', e.target.value)}
+                />
+              </label>
+              {/* pas de champ "taux" */}
+            </div>
+          ))}
+          <button onClick={ajouterPeriode}>Ajouter une période</button>
         </div>
-      ) : null}
+      )}
 
+      <br />
       <button onClick={onCalcul}>Calculer</button>
     </>
   );

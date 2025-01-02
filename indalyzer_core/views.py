@@ -135,6 +135,143 @@ class CalculIndemniteViewSet(viewsets.ModelViewSet):
             print("Erreur lors du calcul:", str(e))
             print("Traceback:", traceback.format_exc())
             return Response({'error': str(e)}, status=400)
+        
+    # def generer_rapport_pdf(self, data):
+    #     from reportlab.pdfgen import canvas
+    #     from reportlab.lib.pagesizes import letter
+    #     from io import BytesIO
+
+    #     print("Début de generer_rapport_pdf")
+    #     print("Contenu de data:", data)
+
+    #     buffer = BytesIO()
+    #     p = canvas.Canvas(buffer, pagesize=letter)
+
+    #     try:
+    #         # Paramètres de style
+    #         font_name = 'Helvetica'
+    #         font_size = 10
+    #         p.setFont(font_name, font_size)
+
+    #         # Marges
+    #         left_margin = 70
+    #         top_margin = 750
+
+    #         # Largeurs de colonnes (exemple)
+    #         col_width_period = 180  # pour "Période"
+    #         col_width_jours = 100   # pour "Nombre de jours"
+    #         col_width_montant = 120 # pour "Montant journalier"
+    #         col_width_degressivite = 80 # pour "Dégressivité"
+    #         col_width_total = 80    # pour "Total"
+
+    #         # Positions horizontales des colonnes
+    #         x_period = left_margin
+    #         x_jours = x_period + col_width_period
+    #         x_montant = x_jours + col_width_jours
+
+    #         # Vérifier si on doit afficher la colonne "Dégressivité" (que pour DC sans Assuralia)
+    #         afficher_degressivite = data.get('dc_sans_assuralia', False)
+
+    #         if afficher_degressivite:
+    #             x_degressivite = x_montant + col_width_montant
+    #             x_total = x_degressivite + col_width_degressivite
+    #         else:
+    #             x_total = x_montant + col_width_montant
+
+    #         y = top_margin
+
+    #         # Informations de base
+    #         p.drawString(left_margin, y, f"Assuré(e): {data['affilie']['nom']} {data['affilie']['prenom']}")
+    #         y -= 20
+    #         p.drawString(left_margin, y, f"NISS: {data['affilie']['niss']}")
+    #         y -= 20
+    #         p.drawString(left_margin, y, f"Date de l'accident: {data['accident']['date']}")
+    #         y -= 20
+    #         p.drawString(left_margin, y, f"Taux IPP: {data['accident']['taux_ipp']}%")
+    #         y -= 40  # Espacement supplémentaire après les informations générales
+
+    #         # Ajout du commentaire
+    #         if 'commentaire' in data and data['commentaire']:
+    #             p.drawString(left_margin, y, data['commentaire'])
+    #             y -= 30  # Espacement après le commentaire
+
+    #         # Espacement supplémentaire avant le tableau
+    #         y -= 20
+
+    #         # Titres du tableau
+    #         p.drawString(x_period, y, "Période")
+    #         p.drawString(x_jours, y, "Nombre de jours")
+    #         p.drawString(x_montant, y, "Montant journalier")
+
+    #         if afficher_degressivite:
+    #             p.drawString(x_degressivite, y, "Dégressivité")
+
+    #         p.drawString(x_total, y, "Total")
+
+    #         y -= 20
+
+    #         # Traitement des lignes du tableau
+    #         for idx, periode in enumerate(data['periodes']):
+    #             debut = periode.get('debut')
+    #             fin = periode.get('fin')
+    #             nombre_jours = periode.get('nombre_jours', 'N/A')
+    #             montant_journalier = periode.get('montant_journalier_rente', 0)
+    #             total = periode.get('total', 0)
+    #             taux_applicable = periode.get('taux_applicable', 100)  # Par défaut 100%
+
+    #             # Affichage de la période : aligné à gauche, pas de centrage nécessaire
+    #             p.drawString(x_period, y, f"{debut} - {fin}")
+
+    #             # Centrer le nombre de jours dans sa colonne
+    #             jours_text = str(nombre_jours)
+    #             # On calcule le centre de la colonne "Nombre de jours"
+    #             col_center_jours = x_jours + (col_width_jours / 2)
+    #             p.drawCentredString(col_center_jours, y, jours_text)
+
+    #             # Centrer le montant journalier dans sa colonne (par exemple)
+    #             montant_text = f"{montant_journalier:.2f}€"
+    #             col_center_montant = x_montant + (col_width_montant / 2)
+    #             p.drawCentredString(col_center_montant, y, montant_text)
+
+    #             if afficher_degressivite:
+    #                 # Centrer la dégressivité également
+    #                 degressivite_text = f"{taux_applicable}%"
+    #                 col_center_degressivite = x_degressivite + (col_width_degressivite / 2)
+    #                 p.drawCentredString(col_center_degressivite, y, degressivite_text)
+
+    #                 # Pour la colonne Total, on peut aligner le texte à droite par exemple
+    #                 total_text = f"{total:.2f}€"
+    #                 text_width = p.stringWidth(total_text, font_name, font_size)
+    #                 x_total_right = x_total + col_width_total - text_width - 35
+    #                 p.drawString(x_total_right, y, total_text)
+    #             else:
+    #                 # Pas de dégressivité, juste aligner total à droite
+    #                 total_text = f"{total:.2f}€"
+    #                 text_width = p.stringWidth(total_text, font_name, font_size)
+    #                 x_total_right = x_total + col_width_total - text_width
+    #                 p.drawString(x_total_right, y, total_text)
+
+    #             y -= 20
+
+    #         # Total général
+    #         y -= 20
+    #         total_general_text = f"{data['total_general']:.2f}€"
+    #         p.drawString(x_period, y, "Total général:")
+    #         # On aligne le total général à droite dans la colonne Total
+    #         text_width = p.stringWidth(total_general_text, font_name, font_size)
+    #         x_total_right = x_total + col_width_total - text_width
+    #         p.drawString(x_total_right, y, total_general_text)
+
+    #         p.showPage()
+    #         p.save()
+
+    #         buffer.seek(0)
+    #         print("Génération du PDF terminée avec succès")
+    #         return buffer
+    #     except Exception as e:
+    #         print(f"Erreur dans generer_rapport_pdf: {str(e)}")
+    #         print(f"Données problématiques: {data}")
+    #         raise
 
     def generer_rapport_pdf(self, data):
         # Votre code existant pour générer le PDF
@@ -212,6 +349,7 @@ class CalculIndemniteViewSet(viewsets.ModelViewSet):
                     p.drawString(x_total, y, f"{total:.2f}€")
                 else:
                     p.drawString(x_total, y, f"{total:.2f}€")
+
                 y -= 20
 
             p.drawString(250, y - 20, "Total général:")

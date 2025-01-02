@@ -13,6 +13,7 @@ class CalculDCSansAssuralia(CalculateurRente):
         # return montant_journalier
         # Cette méthode n'est plus nécessaire dans sa forme actuelle
         # Nous allons utiliser le montant journalier provenant de la base de données
+        
         pass
 
     def preparer_periodes(self):
